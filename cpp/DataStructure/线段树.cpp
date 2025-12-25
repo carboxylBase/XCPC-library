@@ -11,8 +11,7 @@ const ll INF = 1e18;
 #define LS (rt << 1)
 #define RS (rt << 1 | 1)
 
-class SegTree{
-public:
+struct SegTree{
     struct Node{
         Node() {
 
