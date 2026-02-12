@@ -1,219 +1,214 @@
+// It's a wonderful life.
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
+#define DEBUG 1
 const ll N = 2000000;
+const ll MOD = 998244353;
+const ll MAX = 1e18;
 
 /*
-支持自定义结构体从小到大排序的平衡树
-注意在使用 suc 或者 pre 时,如果树中不存在这个前后驱,会 re
-可通过插入正负无穷解决这个问题
+可重集合
+rank 得到的是比 val 小的 Node 的数量
 */
-
 template<typename T, typename Compare = std::less<T>>
-class SplayTree {
-private:
-    int siz;
-    struct Node {
-        T key;
-        Node *left, *right, *parent;
-        int cnt;  
-        std::size_t sz; 
-        Node(const T& k, Node* p=nullptr)
-          : key(k), left(nullptr), right(nullptr), parent(p), cnt(1), sz(1) {}
-    };
+struct Splay{
+    int rt,tot;
+    struct Node{
+        T val;
+        int cnt,fa,ch[2],siz;
+    }nodes[N];
 
-    Node* root = nullptr;
-    Compare comp;
+    Compare cmp;
+    bool lt(const T &a, const T &b) const { return cmp(a,b); }
+    bool eq(const T &a, const T &b) const { return !cmp(a,b) && !cmp(b,a); }
 
-    void update(Node* x) {
-        x->sz = x->cnt
-              + (x->left ? x->left->sz : 0)
-              + (x->right ? x->right->sz : 0);
+    int newNode(const T &x){
+        ++tot;
+        nodes[tot].val = x;
+        nodes[tot].cnt = nodes[tot].siz = 1;
+        nodes[tot].fa = nodes[tot].ch[0] = nodes[tot].ch[1] = 0;
+        return tot;
     }
 
-    void rotate_left(Node* x) {
-        Node* y = x->right;
-        x->right = y->left;
-        if (y->left) y->left->parent = x;
-        y->parent = x->parent;
-        if (!x->parent) root = y;
-        else if (x == x->parent->left) x->parent->left = y;
-        else x->parent->right = y;
-        y->left = x; x->parent = y;
-        update(x); update(y);
+    void init(){
+        // 初始化 nodes[0]
+        nodes[0].cnt = nodes[0].siz = nodes[0].fa = nodes[0].ch[0] = nodes[0].ch[1] = 0;
+        tot = 0;
+        int a = newNode(T(-INT_MAX));
+        int b = newNode(T(INT_MAX));
+        rt = a;
+        nodes[rt].ch[1] = b;
+        nodes[b].fa = rt;
+        update(rt);
     }
 
-    void rotate_right(Node* x) {
-        Node* y = x->left;
-        x->left = y->right;
-        if (y->right) y->right->parent = x;
-        y->parent = x->parent;
-        if (!x->parent) root = y;
-        else if (x == x->parent->left) x->parent->left = y;
-        else x->parent->right = y;
-        y->right = x; x->parent = y;
-        update(x); update(y);
+    void update(int x){
+        nodes[x].siz = nodes[nodes[x].ch[0]].siz + nodes[nodes[x].ch[1]].siz + nodes[x].cnt;
     }
 
-    void splay(Node* x) {
-        while (x->parent) {
-            Node* p = x->parent;
-            Node* g = p->parent;
-            if (!g) {
-                if (x == p->left) rotate_right(p);
-                else rotate_left(p);
-            } else if ((x == p->left) == (p == g->left)) {
-                if (x == p->left) { rotate_right(g); rotate_right(p); }
-                else { rotate_left(g); rotate_left(p); }
-            } else {
-                if (x == p->left) { rotate_right(p); rotate_left(g); }
-                else { rotate_left(p); rotate_right(g); }
+    void rot_left(int x){
+        int y = nodes[x].fa,z = nodes[y].fa;
+        nodes[y].ch[1] = nodes[x].ch[0]; nodes[nodes[x].ch[0]].fa = y;
+        nodes[x].ch[0] = y; nodes[y].fa = x;
+        nodes[z].ch[nodes[z].ch[1] == y] = x; nodes[x].fa = z;
+        update(y); update(x);
+    }
+
+    void rot_right(int x){
+        int y = nodes[x].fa,z = nodes[y].fa;
+        nodes[y].ch[0] = nodes[x].ch[1]; nodes[nodes[x].ch[1]].fa = y;
+        nodes[x].ch[1] = y; nodes[y].fa = x;
+        nodes[z].ch[nodes[z].ch[1] == y] = x; nodes[x].fa = z;
+        update(y); update(x);
+    }
+
+    int getlr(int x){
+        return nodes[nodes[x].fa].ch[1] == x;
+    }
+
+    void rotate(int x){
+        if (getlr(x)) rot_left(x); else rot_right(x);
+    }
+
+    void splay(int x,int target){
+        if (!target) rt = x;
+        while (nodes[x].fa != target){
+            int y = nodes[x].fa, z = nodes[y].fa;
+            if (z != target){
+                if (getlr(x) == getlr(y)) rotate(y);
+                else rotate(x);
+            }
+            rotate(x);
+        }
+    }
+
+    void find(const T &x){
+        if (!rt) return;
+        int p = rt;
+        while (!eq(nodes[p].val, x) && nodes[p].ch[ lt(nodes[p].val, x) ? 1 : 0 ]){
+            p = nodes[p].ch[ lt(nodes[p].val, x) ? 1 : 0 ];
+        }
+        splay(p,0);
+    }
+
+    int pre(const T &x){
+        find(x);
+        if (lt(nodes[rt].val, x)) return rt;
+        int p = nodes[rt].ch[0];
+        while (nodes[p].ch[1]) p = nodes[p].ch[1];
+        splay(p,0);
+        return p;
+    }
+
+    int suc(const T &x){
+        find(x);
+        if (lt(x, nodes[rt].val)) return rt;
+        int p = nodes[rt].ch[1];
+        while (nodes[p].ch[0]) p = nodes[p].ch[0];
+        splay(p,0);
+        return p;
+    }
+
+    void insert(const T &x){
+        int p = rt, fp = 0;
+        while (p && !eq(nodes[p].val, x)){
+            fp = p; p = nodes[p].ch[ lt(nodes[p].val, x) ? 1 : 0 ];
+        }
+        if (!p){
+            p = newNode(x);
+            nodes[fp].ch[ lt(nodes[fp].val, x) ? 1 : 0 ] = p;
+            nodes[p].fa = fp;
+        }else{
+            nodes[p].cnt++;
+        }
+        splay(p,0);
+    }
+
+    void del(const T &x){
+        int xPre = pre(x), xSuc = suc(x);
+        splay(xPre,0); splay(xSuc,xPre);
+        int d = nodes[xSuc].ch[0];
+        if (--nodes[d].cnt){
+            splay(d,0);
+        }else{
+            nodes[xSuc].ch[0] = 0;
+            update(xSuc); update(xPre);
+        }
+    }
+
+    int kth(long long x){
+        int p = rt;
+        while (1){
+            int v = nodes[p].ch[0];
+            if (nodes[v].siz + nodes[p].cnt < x){
+                x -= nodes[v].siz + nodes[p].cnt;
+                p = nodes[p].ch[1];
+            }else{
+                if (nodes[v].siz < x){
+                    splay(p,0);
+                    return p;
+                }else p = v;
             }
         }
     }
 
-    Node* find_node(const T& key) {
-        Node* x = root;
-        while (x) {
-            if (comp(key, x->key)) x = x->left;
-            else if (comp(x->key, key)) x = x->right;
-            else return x;
-        }
-        return nullptr;
-    }
-
-public:
-    SplayTree(Compare c = Compare()) : comp(c) {}
-
-    void insert(const T& key) {
-        siz++;
-        if (!root) {
-            root = new Node(key);
-            return;
-        }
-        Node* x = root;
-        Node* p = nullptr;
-        while (x && !( !comp(key, x->key) && !comp(x->key, key) )) {
-            p = x;
-            x = comp(key, x->key) ? x->left : x->right;
-        }
-        if (x) {
-            x->cnt++;
-            splay(x);
-        } else {
-            x = new Node(key, p);
-            if (comp(key, p->key)) p->left = x;
-            else p->right = x;
-            splay(x);
-        }
-    }
-
-    bool contains(const T& key) {
-        Node* x = find_node(key);
-        if (x) { splay(x); return true; }
-        return false;
-    }
-
-    void erase(const T& key) {
-        Node* x = find_node(key);
-        if (!x) return;
-        siz--;
-        splay(x);
-        if (x->cnt > 1) {
-            x->cnt--;
-            update(x);
-            return;
-        }
-        Node* L = x->left;
-        Node* R = x->right;
-        delete x;
-        if (L) L->parent = nullptr;
-        if (!L) {
-            root = R;
-            if (R) R->parent = nullptr;
-        } else {
-            Node* m = L;
-            while (m->right) m = m->right;
-            splay(m);
-            m->right = R;
-            if (R) R->parent = m;
-            root = m;
-            update(root);
-        }
-    }
-
-    bool empty() const { return root == nullptr; }
-
-    std::size_t size() const { return root ? root->sz : 0; }
-
-    T kth(std::size_t k) {
-        if (!root || k<1 || k>root->sz) throw std::out_of_range("k");
-        Node* x = root;
-        while (x) {
-            std::size_t L = x->left? x->left->sz : 0;
-            if (k <= L) x = x->left;
-            else if (k > L + x->cnt) {
-                k -= L + x->cnt;
-                x = x->right;
-            } else {
-                splay(x);
-                return x->key;
-            }
-        }
-        throw std::out_of_range("k");
-    } 
-
-    std::size_t getRank(const T& key) {
-        if (!root) return 0;
-        Node* x = root;
-        std::size_t rank = 0;
-        while (x) {
-            if (comp(key, x->key)) {
-                x = x->left;
-            } else {
-                std::size_t L = x->left? x->left->sz : 0;
-                rank += L;
-                if (!comp(x->key, key) && !comp(key, x->key)) {
-                    splay(x);
-                    return rank;
-                }
-                rank += x->cnt;
-                x = x->right;
-            }
-        }
-        if (x) splay(x);
-        return rank;
-    } 
-
-    T pre(const T& key) {
-        Node* x = root;
-        Node* pred = nullptr;
-        while (x) {
-            if (comp(x->key, key)) {
-                pred = x;
-                x = x->right;
-            } else x = x->left;
-        }
-        if (!pred) throw std::out_of_range("no predecessor");
-        splay(pred);
-        return pred->key;
-    }  
-
-    T suc(const T& key) {
-        Node* x = root;
-        Node* succ = nullptr;
-        while (x) {
-            if (comp(key, x->key)) {
-                succ = x;
-                x = x->left;
-            } else x = x->right;
-        }
-        if (!succ) throw std::out_of_range("no successor");
-        splay(succ);
-        return succ->key;
-    } 
-
-    int size() {
-        return siz;
+    int getRank(const T &x){
+        find(x);
+        return nodes[nodes[rt].ch[0]].siz;
     }
 };
+
+struct Node {
+    ll val;
+    Node(ll VAL_ = 0) {val = VAL_;}
+    bool operator<(const Node& A) const {
+        return val < A.val;
+    }
+};
+Splay<Node> solver;
+
+void solve(){
+    int n,m;cin >> n >> m;
+    solver.init();
+    for (int i = 1;i<n+1;i++){
+        int x;cin >> x;solver.insert(x);
+    }
+    int last = 0,ans = 0;
+    while (m--){
+        int opt,x;cin >> opt >> x;
+        x ^= last;
+        if (opt == 1){
+            solver.insert(x);
+        }else if (opt == 2){
+            solver.del(x);
+        }else if (opt == 3){
+            solver.insert(x);
+            last = solver.getRank(x);
+            solver.del(x);
+        }else if (opt == 4){
+            last = solver.nodes[solver.kth(x+1)].val.val;
+        }else if (opt == 5){
+            last = solver.nodes[solver.pre(x)].val.val;
+        }else{
+            last = solver.nodes[solver.suc(x)].val.val;
+        }
+        if (opt > 2){
+            ans ^= last;
+        }
+    }
+
+    cout << ans;
+    return;
+}
+
+signed main(){
+    freopen("input.txt","r",stdin);
+    ios::sync_with_stdio(0),cin.tie(0),cout.tie(0);
+    int _ = 1;
+    // cin >> _;
+    while (_--){
+        solve();
+    }
+    return 0;
+}

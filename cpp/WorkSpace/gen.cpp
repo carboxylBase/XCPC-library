@@ -1,37 +1,54 @@
-#include <bits/stdc++.h>
-using namespace std;
+#define DEBUG 0
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
 
-int main() {
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+const int M = 600;
+void solve() {
+    cout << 1 << endl;
+    srand(time(0));
+    int l = rand() % M, r = rand() % M;
+    if (l > r) swap(l, r);
+    cout << l << ' ' << r << endl;
+    return;
+}
+
+signed main() {
+#if DEBUG
+    freopen("input.txt", "w", stdout);
+    auto start_time = chrono::steady_clock::now();
+#else
     ios::sync_with_stdio(false);
+#endif
     cin.tie(nullptr);
 
-    // freopen("input.txt", "w", stdout);
+    int t = 1;
+    // cin >> t;
 
-    int n = 3, m = 2, C = 2, Q = 5;
-    cout << n << " " << m << " " << C << " " << Q << "\n";
-
-    mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
-
-    for (int i = 0; i < m; i++) {
-        int u = rng() % n + 1;
-        int v = rng() % n + 1;
-        while (u == v) v = rng() % n + 1;
-        if (u > v) swap(u, v);
-        int c = rng() % C + 1;
-        cout << u << " " << v << " " << c << "\n";
+    while (t--) {
+        solve();
     }
 
-    for (int i = 0; i < Q; i++) {
-        if (rng() % 2) {
-            cout << "Q\n";
-        } else {
-            int u = rng() % n + 1;
-            int v = rng() % n + 1;
-            while (u == v) v = rng() % n + 1;
-            if (u > v) swap(u, v);
-            int c = rng() % C + 1;
-            cout << "T " << u << " " << v << " " << c << "\n";
-        }
-    }
+#if DEBUG
+    auto end_time = chrono::steady_clock::now();
+    auto diff = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+    cerr << "Time: " << diff.count() << " ms" << endl;
+
+#endif
+
     return 0;
 }

@@ -10,7 +10,6 @@ const ll N = 2000000;
 const ll INF = 5e18;
 const ll MOD = 1e9 + 7;
 
-
 class Graph {
 public:
     int n;        

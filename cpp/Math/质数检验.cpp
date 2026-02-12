@@ -1,31 +1,85 @@
-#include <bits/stdc++.h>
-using namespace std;
-using ull = unsigned long long;
-using u128 = __uint128_t;
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
 
-ull modmul(ull a, ull b, ull m){ return (u128)a*b % m; }
-ull modpow(ull a, ull e, ull m){ u128 r=1, x=a%m; while(e){ if(e&1) r=(r*x)%m; x=(x*x)%m; e>>=1; } return (ull)r; }
-bool miller_check(ull n, ull a){
-    if(a % n == 0) return true;
-    ull d = n-1; int s = 0;
-    while((d&1)==0){ d >>= 1; ++s; }
-    ull x = modpow(a, d, n);
-    if(x==1 || x==n-1) return true;
-    for(int i=1;i<s;i++){
-        x = modmul(x, x, n);
-        if(x==n-1) return true;
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+
+// max_prime_factor, 输入 n, 返回 n 的最大质因子
+// 如果 n 是质数, 返回 -1
+
+namespace primeCheck {
+    std::mt19937_64 rng((unsigned)std::chrono::steady_clock::now().time_since_epoch().count());
+    ll mulmod(ll a, ll b, ll mod){ return (unsigned __int128)a*b%mod; }
+    ll powmod(ll a, ll d, ll mod){
+        ll r=1;
+        while(d){
+            if(d&1) r=mulmod(r,a,mod);
+            a=mulmod(a,a,mod);
+            d>>=1;
+        }
+        return r;
     }
-    return false;
-}
-// 时间复杂度: O(k * log^3 n)（k为基础集合大小，常数）
-// 用法: if(isPrime(n)) // n <= 1e18
-bool isPrime(ull n){
-    if(n < 2) return false;
-    for(ull p : {2ull,3ull,5ull,7ull,11ull,13ull,17ull,19ull,23ull,29ull,31ull,37ull}){
-        if(n == p) return true;
-        if(n % p == 0) return false;
+    bool isPrime(ll n){
+        if(n<2) return false;
+        for(ll p:{2,3,5,7,11,13,17,19,23,29,31,37}){ if(n%p==0) return n==p; }
+        ll d=n-1, s=0;
+        while((d&1)==0){ d>>=1; ++s; }
+        ll bases[] = {2,325,9375,28178,450775,9780504,1795265022};
+        for(ll a:bases){
+            if(a%n==0) continue;
+            ll x=powmod(a,d,n);
+            if(x==1||x==n-1) continue;
+            bool comp=true;
+            for(ll r=1;r<s;++r){
+                x=mulmod(x,x,n);
+                if(x==n-1){ comp=false; break; }
+            }
+            if(comp) return false;
+        }
+        return true;
     }
-    ull bases[] = {2ull,325ull,9375ull,28178ull,450775ull,9780504ull,1795265022ull};
-    for(ull a : bases) if(!miller_check(n, a)) return false;
-    return true;
+    ll pollards_rho(ll n){
+        if(n%2==0) return 2;
+        if(n%3==0) return 3;
+        std::uniform_int_distribution<ll> dist(2, n-2);
+        while(true){
+            ll c = dist(rng);
+            auto f = [&](ll x){ return (mulmod(x,x,n) + c) % n; };
+            ll x = dist(rng), y = x, d = 1;
+            while(d==1){
+                x = f(x);
+                y = f(f(y));
+                d = std::gcd(std::llabs(x-y), n);
+            }
+            if(d!=n) return d;
+        }
+    }
+    void factor_rec(ll n, std::vector<ll>& out){
+        if(n==1) return;
+        if(isPrime(n)){ out.push_back(n); return; }
+        ll d = pollards_rho(n);
+        factor_rec(d, out);
+        factor_rec(n/d, out);
+    }
+    ll max_prime_factor(ll n){
+        if(n<=1) return -1;
+        if(isPrime(n)) return -1;
+        std::vector<ll> f;
+        factor_rec(n,f);
+        return *std::max_element(f.begin(), f.end());
+    }
 }

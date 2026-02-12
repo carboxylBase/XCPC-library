@@ -1,29 +1,38 @@
-#include <bits/stdc++.h>
-using namespace std;
-#define DEBUG 1
-using ll = long long;
-using pii = pair<int,int>;
-using i128 = __int128_t;
-using pll = pair<ll,ll>;
-const ll N = 2000000;
-const ll INF = 5e18;
-const ll MOD = 1e9 + 7;
+#include <iostream>
 
-template<ll M>
-struct AutoMod {
-    ll v;
-    AutoMod(ll x=0){ v = x%M; if(v<0) v+=M; }
-    static ll qpow(ll a,ll b){
-        ll r=1, m=M;
-        if(b<0) return qpow(qpow(a,-b),M-2);
-        while(b){ if(b&1) r=r*a%m; a=a*a%m; b>>=1; }
-        return r;
+template <int Mod>
+struct ModInt {
+    int v;
+    ModInt(long long _v = 0) { v = (_v % Mod + Mod) % Mod; }
+    
+    // 基础运算
+    ModInt& operator+=(const ModInt& o) { v += o.v; if (v >= Mod) v -= Mod; return *this; }
+    ModInt& operator-=(const ModInt& o) { v -= o.v; if (v < 0) v += Mod; return *this; }
+    ModInt& operator*=(const ModInt& o) { v = 1LL * v * o.v % Mod; return *this; }
+    
+    // 快速幂与逆元
+    ModInt pow(long long n) const {
+        ModInt res(1), a(*this);
+        while (n > 0) {
+            if (n & 1) res *= a;
+            a *= a; n >>= 1;
+        }
+        return res;
     }
-    AutoMod pow(ll k)const{ return qpow(v,k); }
-    AutoMod inv()const{ return qpow(v,M-2); }
-    AutoMod operator+(AutoMod o) const{ return AutoMod(v+o.v); }
-    AutoMod operator-(AutoMod o) const{ return AutoMod(v-o.v); }
-    AutoMod operator*(AutoMod o) const{ return AutoMod(v*o.v); }
-    AutoMod operator/(AutoMod o) const{ return *this * o.inv(); }
-    bool operator==(AutoMod o) const{ return v==o.v; }
+    ModInt inv() const { return pow(Mod - 2); } // 费马小定理，要求 Mod 是质数
+    
+    ModInt& operator/=(const ModInt& o) { return *this *= o.inv(); }
+    
+    // 友元运算符
+    friend ModInt operator+(ModInt a, const ModInt& b) { return a += b; }
+    friend ModInt operator-(ModInt a, const ModInt& b) { return a -= b; }
+    friend ModInt operator*(ModInt a, const ModInt& b) { return a *= b; }
+    friend ModInt operator/(ModInt a, const ModInt& b) { return a /= b; }
+    
+    // 输入输出
+    friend std::ostream& operator<<(std::ostream& os, const ModInt& a) { return os << a.v; }
+    friend std::istream& operator>>(std::istream& is, ModInt& a) { long long v; is >> v; a = ModInt(v); return is; }
+    
+    bool operator==(const ModInt& o) const { return v == o.v; }
+    bool operator!=(const ModInt& o) const { return v != o.v; }
 };
