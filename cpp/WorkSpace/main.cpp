@@ -1,155 +1,126 @@
-#define DEBUG 1
-#define FUCK cout << "fuck" << endl;
-#if DEBUG
-    #include "all.hpp"
-#else
-    #include <bits/stdc++.h>
-#endif
+#include <iostream>
+#include <algorithm>
 
 using namespace std;
-using ll = long long;
-using pii = pair<int,int>;
-using pll = pair<ll,ll>;
-using db = long double;
-using pdd = pair<db, db>;
-using i128 = __int128_t;
 
-const ll N = 2000000;
-const ll INF = 5e18;
-const ll MOD = 1e9 + 7;
+const int MAXN = 200005; // 操作数 2e5
+const int INF = 2e9;
 
-void solve() {
-    struct F {
-        ll a, b, c;
-    };
-    int n; cin >> n;
-    vector<F> a(n);
-    for (auto &v : a) {
-        cin >> v.a >> v.b >> v.c;
+struct Node {
+    int x[2];               // 坐标
+    int minC[2], maxC[2];   // 子树边界矩形
+    int val, sum;           // 点权值，子树总和
+    int ch[2];              // 左右儿子
+
+    void init(int _x, int _y, int _v) {
+        x[0] = minC[0] = maxC[0] = _x;
+        x[1] = minC[1] = maxC[1] = _y;
+        val = sum = _v;
+        ch[0] = ch[1] = 0;
     }
+} t[MAXN];
 
-    auto chk = [&](F& L, F& R) -> bool {
-        if (L.a == R.a) {
-            if (L.b == R.b && L.c != R.c) {
-                return 0;
-            }
-        } else {
-            if ((L.b - R.b) * (L.b - R.b) - 4 * (L.a - R.a) * (L.c - R.c) < 0) {
-                return 0;
-            }
+int nodeCount = 0;
+int tempIndices[MAXN], ptr;
+
+// 更新节点的统计信息
+void pushup(int p) {
+    t[p].sum = t[p].val + t[t[p].ch[0]].sum + t[t[p].ch[1]].sum;
+    for (int i = 0; i < 2; ++i) {
+        t[p].minC[i] = t[p].maxC[i] = t[p].x[i];
+        if (t[p].ch[0]) {
+            t[p].minC[i] = min(t[p].minC[i], t[t[p].ch[0]].minC[i]);
+            t[p].maxC[i] = max(t[p].maxC[i], t[t[p].ch[0]].maxC[i]);
         }
-        return 1;
-    };
-
-    auto cal = [&](F& L) -> db {
-        return -db(L.b * L.b) / 4 / L.a + L.c;
-    };
-
-    auto baohan = [&](F& L, F& R) -> bool {
-        if (L.a * R.a < 0) return 0;
-        if (chk(L, R)) return 0;
-        db l = cal(L), r = cal(R);
-        if (L.a > 0) {
-            if (l < r) return 1;
-        } else {
-            if (l > r) return 1;
-        }
-        return 0;
-    };
-
-    vector<vector<int>> g(n), e(n);
-    for (int i = 0;i<n;i++) {
-        for (int j = 0;j<n;j++) {
-            if (i == j) continue;
-            if (baohan(a[i], a[j])) {
-                g[i].push_back(j);
-                e[j].push_back(i);
-            }
+        if (t[p].ch[1]) {
+            t[p].minC[i] = min(t[p].minC[i], t[t[p].ch[1]].minC[i]);
+            t[p].maxC[i] = max(t[p].maxC[i], t[t[p].ch[1]].maxC[i]);
         }
     }
-
-    queue<int> q;
-    vector<int> in(n, 0);
-    vector<int> dp1(n, 0);
-    for (int i = 0;i<n;i++) {
-        in[i] = g[i].size();
-        if (in[i] == 0) {
-            q.push(i);
-        }
-    }
-    while (!q.empty()) {
-        int u = q.front(); q.pop();
-        for (auto v : g[u]) {
-            dp1[u] = max(dp1[u], dp1[v]);
-        }
-        dp1[u] ++;
-        for (auto v : e[u]) {
-            in[v] --;
-            if (in[v] == 0) q.push(v);
-        }
-    }
-
-    vector<int> dp2(n, 0);
-    for (int i = 0;i<n;i++) {
-        for (int j = 0;j<n;j++) {
-            if (i == j) continue;
-            if (a[i].a * a[j].a > 0) continue;
-            if (chk(a[i], a[j])) continue;
-            dp2[i] = max(dp2[i], dp1[j]);
-        }
-    }
-
-    vector<int> dp3(n, 0);
-    for (int i = 0;i<n;i++) {
-        in[i] = e[i].size();
-        if (in[i] == 0) q.push(i);
-    }
-    while (!q.empty()) {
-        int u = q.front(); q.pop();
-        for (auto v : e[u]) {
-            dp3[u] = max(dp3[u], dp3[v] + 1);
-        }
-        dp3[u] = max(dp3[u], dp2[u]);
-        for (auto v : g[u]) {
-            in[v] --;
-            if (in[v] == 0) q.push(v);
-        }
-    }
-
-    // for (int i = 0;i<n;i++) {
-    //     cout << i << ' ' << dp1[i] << ' ' << dp2[i] << ' ' << dp3[i] << endl;         
-    // }
-    // cout << endl;
-
-    for (int i = 0;i<n;i++) {
-        cout << dp3[i] + dp1[i] << ' ';
-    }
-    cout << endl;
-    return;
 }
 
-signed main() {
-#if DEBUG
-    freopen("input.txt", "r", stdin);
-    auto start_time = chrono::steady_clock::now();
-#else
-    ios::sync_with_stdio(false);
-#endif
-    cin.tie(nullptr);
+// 递归构建平衡 KD-Tree
+int build(int l, int r, int dim) {
+    if (l > r) return 0;
+    int mid = (l + r) >> 1;
+    nth_element(tempIndices + l, tempIndices + mid, tempIndices + r + 1, [&](int a, int b) {
+        return t[a].x[dim] < t[b].x[dim];
+    });
+    int p = tempIndices[mid];
+    t[p].ch[0] = build(l, mid - 1, dim ^ 1);
+    t[p].ch[1] = build(mid + 1, r, dim ^ 1);
+    pushup(p);
+    return p;
+}
 
-    int t = 1;
-    cin >> t;
+// 展平子树
+void flatten(int p) {
+    if (!p) return;
+    tempIndices[++ptr] = p;
+    flatten(t[p].ch[0]);
+    flatten(t[p].ch[1]);
+}
 
-    while (t--) {
-        solve();
+// 核心查询逻辑
+int query(int p, int x1, int y1, int x2, int y2) {
+    if (!p) return 0;
+    // 1. 完全包含
+    if (t[p].minC[0] >= x1 && t[p].maxC[0] <= x2 && t[p].minC[1] >= y1 && t[p].maxC[1] <= y2)
+        return t[p].sum;
+    // 2. 完全不相交
+    if (t[p].minC[0] > x2 || t[p].maxC[0] < x1 || t[p].minC[1] > y2 || t[p].maxC[1] < y1)
+        return 0;
+    // 3. 部分重叠
+    int res = 0;
+    if (t[p].x[0] >= x1 && t[p].x[0] <= x2 && t[p].x[1] >= y1 && t[p].x[1] <= y2)
+        res += t[p].val;
+    return res + query(t[p].ch[0], x1, y1, x2, y2) + query(t[p].ch[1], x1, y1, x2, y2);
+}
+
+// 二进制分组管理器
+int roots[25], treeSize[25];
+
+void insert(int x, int y, int v) {
+    int cur = ++nodeCount;
+    t[cur].init(x, y, v);
+    
+    ptr = 0;
+    tempIndices[++ptr] = cur;
+    
+    // 类似二进制加法：1 + 1 = 10 (进位合并)
+    for (int i = 0; i < 20; ++i) {
+        if (!roots[i]) {
+            roots[i] = build(1, ptr, 0);
+            treeSize[i] = ptr;
+            return;
+        }
+        flatten(roots[i]);
+        roots[i] = 0; // 清空当前层，准备合并到下一层
+        treeSize[i] = 0;
     }
+}
 
-#if DEBUG
-    auto end_time = chrono::steady_clock::now();
-    auto diff = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-    cerr << "Time: " << diff.count() << " ms" << endl;
+int main() {
+	freopen("input.txt", "r", stdin);
+    ios::sync_with_stdio(false); cin.tie(0);
+    int n_useless; cin >> n_useless; // 棋盘大小 N 对 KD-Tree 没用
+    int lastAns = 0, op;
 
-#endif
-
+    while (cin >> op && op != 3) {
+        if (op == 1) {
+            int x, y, a; cin >> x >> y >> a;
+            insert(x ^ lastAns, y ^ lastAns, a ^ lastAns);
+        } else if (op == 2) {
+            int x1, y1, x2, y2; cin >> x1 >> y1 >> x2 >> y2;
+            x1 ^= lastAns; y1 ^= lastAns; x2 ^= lastAns; y2 ^= lastAns;
+            // 题目保证 x1<=x2, y1<=y2，但不放心可以加个 swap
+            if (x1 > x2) swap(x1, x2);
+            if (y1 > y2) swap(y1, y2);
+            lastAns = 0;
+            for (int i = 0; i < 20; ++i) 
+                if (roots[i]) lastAns += query(roots[i], x1, y1, x2, y2);
+            cout << lastAns << "\n";
+        }
+    }
     return 0;
 }
