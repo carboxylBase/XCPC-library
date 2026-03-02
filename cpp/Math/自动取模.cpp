@@ -1,38 +1,56 @@
 #include <iostream>
+using ll = long long;
 
-template <int Mod>
-struct ModInt {
-    int v;
-    ModInt(long long _v = 0) { v = (_v % Mod + Mod) % Mod; }
-    
-    // 基础运算
-    ModInt& operator+=(const ModInt& o) { v += o.v; if (v >= Mod) v -= Mod; return *this; }
-    ModInt& operator-=(const ModInt& o) { v -= o.v; if (v < 0) v += Mod; return *this; }
-    ModInt& operator*=(const ModInt& o) { v = 1LL * v * o.v % Mod; return *this; }
-    
-    // 快速幂与逆元
-    ModInt pow(long long n) const {
-        ModInt res(1), a(*this);
-        while (n > 0) {
-            if (n & 1) res *= a;
-            a *= a; n >>= 1;
+template<int P>
+struct MODint {
+    int v, c;
+    constexpr MODint() : v(0), c(0) {}
+    constexpr MODint(ll x) : v(0), c(0) {
+        if (x != 0) {
+            while (x % P == 0) x /= P, c++;
+            v = x % P;
+            if (v < 0) v += P;
+        }
+    }
+    constexpr MODint(int v, int c) : v(v), c(c) {}
+    constexpr int val() const {
+        return c > 0 ? 0 : v;
+    }
+    constexpr int inv(int a) const {
+        int b = P - 2, res = 1;
+        for (; b; b >>= 1, a = 1LL * a * a % P) {
+            if (b & 1) res = 1LL * res * a % P;
         }
         return res;
     }
-    ModInt inv() const { return pow(Mod - 2); } // 费马小定理，要求 Mod 是质数
-    
-    ModInt& operator/=(const ModInt& o) { return *this *= o.inv(); }
-    
-    // 友元运算符
-    friend ModInt operator+(ModInt a, const ModInt& b) { return a += b; }
-    friend ModInt operator-(ModInt a, const ModInt& b) { return a -= b; }
-    friend ModInt operator*(ModInt a, const ModInt& b) { return a *= b; }
-    friend ModInt operator/(ModInt a, const ModInt& b) { return a /= b; }
-    
-    // 输入输出
-    friend std::ostream& operator<<(std::ostream& os, const ModInt& a) { return os << a.v; }
-    friend std::istream& operator>>(std::istream& is, ModInt& a) { long long v; is >> v; a = ModInt(v); return is; }
-    
-    bool operator==(const ModInt& o) const { return v == o.v; }
-    bool operator!=(const ModInt& o) const { return v != o.v; }
+    constexpr MODint& operator*=(MODint rhs) {
+        if (v == 0 || rhs.v == 0) return *this = MODint();
+        v = 1LL * v * rhs.v % P;
+        c += rhs.c;
+        return *this;
+    }
+    constexpr MODint& operator/=(MODint rhs) {
+        v = 1LL * v * inv(rhs.v) % P;
+        c -= rhs.c;
+        return *this;
+    }
+    friend constexpr MODint operator*(MODint lhs, MODint rhs) {
+        MODint res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend constexpr MODint operator/(MODint lhs, MODint rhs) {
+        MODint res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream& operator>>(std::istream& is, MODint& a) {
+        ll x;
+        is >> x;
+        a = MODint(x);
+        return is;
+    }
+    friend std::ostream& operator<<(std::ostream& os, const MODint& a) {
+        return os << a.val();
+    }
 };

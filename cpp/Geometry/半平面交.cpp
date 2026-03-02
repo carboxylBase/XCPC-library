@@ -1,12 +1,27 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <algorithm>
-#include <iomanip>
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
 
 using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
 
-typedef double db;
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+/*
+观察 getS 函数， 发现最后 tail 和 head 之间的就是半平面交的凸包
+复杂度是 nlogn
+*/
+
 const db eps = 1e-10;
 
 struct Point {
@@ -14,7 +29,7 @@ struct Point {
     Point operator-(const Point& b) const { return {x - b.x, y - b.y}; }
     Point operator+(const Point& b) const { return {x + b.x, y + b.y}; }
     Point operator*(db k) const { return {x * k, y * k}; }
-    db operator^(const Point& b) const { return x * b.y - y * b.x; } // 叉积
+    db operator^(const Point& b) const { return x * b.y - y * b.x; }
 };
 
 struct Line {
@@ -26,7 +41,6 @@ struct Line {
     }
 };
 
-// 获取两条直线的交点
 Point getIntersect(Line a, Line b) {
     Point v1 = a.p2 - a.p1;
     Point v2 = b.p2 - b.p1;
@@ -35,20 +49,16 @@ Point getIntersect(Line a, Line b) {
     return a.p1 + v1 * t;
 }
 
-// 判断点 p 是否在有向直线 l 的右侧 (严格右侧)
 bool isRight(Line l, Point p) {
     return ((l.p2 - l.p1) ^ (p - l.p1)) < -eps;
 }
 
-db halfPlaneIntersection(vector<Line>& lines) {
-    // 1. 极角排序
+db getS(vector<Line>& lines) {
     sort(lines.begin(), lines.end(), [](Line a, Line b) {
         if (abs(a.angle - b.angle) > eps) return a.angle < b.angle;
-        // 极角相同时，靠左的排在后面，后续用 unique 去重保留最后一个
         return ((a.p2 - a.p1) ^ (b.p2 - a.p1)) < -eps;
     });
 
-    // 2. 去重：极角相同，保留最左侧的
     int n = lines.size();
     int m = 0;
     for (int i = 0; i < n; i++) {
@@ -57,7 +67,6 @@ db halfPlaneIntersection(vector<Line>& lines) {
     }
     lines.erase(lines.begin() + m, lines.end());
 
-    // 3. 双端队列维护
     int head = 0, tail = 0;
     vector<Line> dq(lines.size() + 5);
     vector<Point> p(lines.size() + 5);
@@ -69,46 +78,22 @@ db halfPlaneIntersection(vector<Line>& lines) {
         
         dq[tail++] = lines[i];
         if (abs((dq[tail - 1].p2 - dq[tail - 1].p1) ^ (dq[tail - 2].p2 - dq[tail - 2].p1)) < eps) {
-            tail--; // 平行线处理，逻辑上在排序去重阶段已处理，此处防抖
+            tail--;
             if (!isRight(dq[tail], lines[i].p1)) dq[tail] = lines[i];
         }
         if (tail - head > 1) p[tail - 1] = getIntersect(dq[tail - 2], dq[tail - 1]);
     }
 
-    // 4. 最后用队首检查队尾，队尾检查队首
     while (tail - head > 1 && isRight(dq[head], p[tail - 1])) tail--;
     while (tail - head > 1 && isRight(dq[tail - 1], p[head + 1])) head++;
 
-    if (tail - head < 3) return 0.0; // 无法构成多边形
+    if (tail - head < 3) return 0.0;
 
-    // 封闭图形，计算最后一个交点
     p[head] = getIntersect(dq[tail - 1], dq[head]);
 
-    // 5. 计算面积
     db area = 0;
     for (int i = head; i < tail; i++) {
         area += (p[i] ^ p[i == tail - 1 ? head : i + 1]);
     }
     return abs(area) / 2.0;
-}
-
-int main() {
-    freopen("input.txt", "r", stdin);
-    ios::sync_with_stdio(false);
-    cin.tie(0);
-    int n;
-    if (!(cin >> n)) return 0;
-    vector<Line> allLines;
-    for (int i = 0; i < n; i++) {
-        int m;
-        cin >> m;
-        vector<Point> poly(m);
-        for (int j = 0; j < m; j++) cin >> poly[j].x >> poly[j].y;
-        for (int j = 0; j < m; j++) {
-            allLines.push_back(Line(poly[j], poly[(j + 1) % m]));
-        }
-    }
-
-    cout << fixed << setprecision(3) << halfPlaneIntersection(allLines) << endl;
-    return 0;
 }
