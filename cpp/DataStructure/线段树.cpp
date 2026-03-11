@@ -84,91 +84,6 @@ struct SegTree{
     }
 };
 
-class SegTreePlusMul{
-struct Node{
-    ll sum,plus,mul,len;
-};
-private:
-    Node nodes[N];
-public:
-    ll mod;
-    Node merge(Node A,Node B){
-        Node C;
-        C.plus = 0;
-        C.mul = 1;
-        C.sum = (A.sum + B.sum) % mod;
-        C.len = A.len + B.len;
-        return C;
-    }
-    void build(ll rt,ll l,ll r){
-        if (l==r){
-            cin >> nodes[rt].sum;
-            nodes[rt].len = 1;
-            nodes[rt].plus = 0;
-            nodes[rt].mul = 1;
-            return;
-        }
-        ll mid = l+r>>1;
-        build(LS,l,mid),build(RS,mid+1,r);
-        nodes[rt] = merge(nodes[LS],nodes[RS]);
-    }
-    void pushDown(int rt){
-        nodes[RS].sum = (nodes[RS].sum*nodes[rt].mul%mod+nodes[rt].plus*nodes[RS].len%mod) % mod;
-        nodes[LS].sum = (nodes[RS].sum*nodes[rt].mul%mod+nodes[rt].plus*nodes[LS].len%mod) % mod;
-
-        nodes[RS].mul = (nodes[RS].mul*nodes[rt].mul) % mod;
-        nodes[LS].mul = (nodes[LS].mul*nodes[rt].mul) % mod;
-
-        nodes[RS].plus = (nodes[RS].plus*nodes[rt].mul+nodes[rt].plus) % mod;
-        nodes[LS].plus = (nodes[LS].plus*nodes[rt].mul+nodes[rt].plus) % mod;
-
-        nodes[rt].plus = 0;
-        nodes[rt].mul = 1;
-    }
-    void update(ll rt,ll l,ll r,ll ql,ll qr,ll mode,ll k){
-        if (ql <= l && r <= qr){
-            if (mode == 1){
-                nodes[rt].plus += k;
-                nodes[rt].plus %= mod;
-                nodes[rt].sum += (k * nodes[rt].len) % mod;
-                nodes[rt].sum %= mod;
-            }else{
-                nodes[rt].plus *= k;
-                nodes[rt].plus %= mod;
-                nodes[rt].mul *= k;
-                nodes[rt].mul %= mod;
-                nodes[rt].sum *= k;
-                nodes[rt].sum %= mod;
-            }
-            return;
-        }
-        pushDown(rt);
-        ll mid = l+r>>1;
-        if (ql<=mid){
-            update(LS,l,mid,ql,qr,mode,k);
-        }
-        if (qr >= mid+1){
-            update(RS,mid+1,r,ql,qr,mode,k);
-        }
-        nodes[rt] = merge(nodes[LS],nodes[RS]);
-    }
-    Node query(ll rt,ll l,ll r,ll ql,ll qr){
-        if (ql <= l && r <= qr){
-            return nodes[rt];
-        }
-        pushDown(rt);
-        ll mid = l+r>>1;
-        if (qr<=mid){
-            return query(LS,l,mid,ql,qr);
-        }else if (ql>=mid+1){
-            return query(RS,mid+1,r,ql,qr);
-        }else{
-            return merge(query(LS,l,mid,ql,qr),query(RS,mid+1,r,ql,qr));
-        }
-    }
-};
-
-
 // 调用前先 init
 #define LS nodes[rt].ls
 #define RS nodes[rt].rs
@@ -333,3 +248,115 @@ struct DynamicSegTree {
 	}
 } solver;
 
+
+/*
+线段树合并以及线段树分裂的整合代码
+细节还是比较多的, 比如说, 注意这个 split 之后的 pushUp
+*/
+namespace SegTree {
+    struct Node {
+        int ch[2];
+        ll cnt, sum;
+        Node() {
+            ch[0] = ch[1] = cnt = sum = 0;
+        }
+    } nodes[N * 4];
+    int tp;
+
+    void init() { tp = 0; }
+
+    int New() {
+        ++ tp;
+        nodes[tp] = Node();
+        return tp;
+    }
+
+    #define ls(x) nodes[x].ch[0]
+    #define rs(x) nodes[x].ch[1]
+
+    void push_up(int rt) {
+        nodes[rt].sum = nodes[rt].cnt = 0;
+        if (ls(rt)) {
+            nodes[rt].sum += nodes[ls(rt)].sum;
+            nodes[rt].cnt += nodes[ls(rt)].cnt;
+        }
+        if (rs(rt)) {
+            nodes[rt].sum += nodes[rs(rt)].sum;
+            nodes[rt].cnt += nodes[rs(rt)].cnt;
+        }
+        return;
+    }
+
+    void update(int &rt, int l, int r, int q, ll c) {
+        if (!rt) rt = New();
+        if (l == r) {
+            nodes[rt].sum += c;
+            nodes[rt].cnt += c;
+            return;
+        }
+        int mid = l + r >> 1;
+        if (q <= mid) update(ls(rt), l, mid, q, c);
+        else update(rs(rt), mid + 1, r, q, c);
+        push_up(rt);
+        return;
+    }
+
+    ll query(int rt, int l, int r, int ql, int qr) {
+        if (!rt) return 0;
+        if (qr < l || ql > r || ql > qr) return 0;
+        if (ql <= l && r <= qr) return nodes[rt].sum;
+        int mid = l + r >> 1;
+        return query(ls(rt), l, mid, ql, qr) + query(rs(rt), mid + 1, r, ql, qr);
+    }
+
+    int findK(int rt, int l, int r, ll k) {
+        if (!rt || nodes[rt].sum < k) return -1;
+        if (l == r) return l;
+        int mid = l + r >> 1;
+        if (nodes[ls(rt)].sum >= k) {
+            return findK(ls(rt), l, mid, k);
+        } else {
+            k -= nodes[ls(rt)].sum;
+            return findK(rs(rt), mid + 1, r, k);
+        }
+    }
+
+    int merge(int x, int y, int l, int r) {
+        if (!x || !y) return x + y;
+        if (l == r) {
+            nodes[x].cnt += nodes[y].cnt;
+            nodes[x].sum += nodes[y].sum;
+            return x;
+        }
+        int mid = l + r >> 1;
+        ls(x) = merge(ls(x), ls(y), l, mid);
+        rs(x) = merge(rs(x), rs(y), mid + 1, r);
+        push_up(x);
+        return x;
+    }
+
+    void split(int x, int& y, int l, int r, ll k) {
+        if (!k) return;
+        if (!y) y = New();
+        if (l == r) {
+            // assert(nodes[x].sum >= k);
+            nodes[x].cnt -= k;
+            nodes[x].sum -= k;
+            nodes[y].cnt += k;
+            nodes[y].sum += k;
+            return;
+        }
+        int mid = l + r >> 1;
+        if (nodes[ls(x)].sum <= k) {
+            k -= nodes[ls(x)].sum;
+            nodes[y].ch[0] = ls(x);
+            ls(x) = 0;
+            split(rs(x), rs(y), mid + 1, r, k);
+        } else {
+            split(ls(x), ls(y), l, mid, k);
+        }
+        push_up(x); push_up(y);
+        return;
+    }
+};
+using namespace SegTree;

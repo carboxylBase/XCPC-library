@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/ComputerScience/XCPC-library/cpp/WorkSpace",
-      "program": "d:/ComputerScience/XCPC-library/cpp/WorkSpace/build/Debug/outDebug",
+      "cwd": "d:/carboxylBase/XCPC-library/cpp/WorkSpace",
+      "program": "d:/carboxylBase/XCPC-library/cpp/WorkSpace/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

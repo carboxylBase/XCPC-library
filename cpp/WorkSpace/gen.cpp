@@ -1,54 +1,15 @@
-#define DEBUG 0
-#define FUCK cout << "fuck" << endl;
-#if DEBUG
-    #include "all.hpp"
-#else
-    #include <bits/stdc++.h>
-#endif
-
+#include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
-using pii = pair<int,int>;
-using pll = pair<ll,ll>;
-using db = long double;
-using pdd = pair<db, db>;
-using i128 = __int128_t;
 
-const ll N = 2000000;
-const ll INF = 5e18;
-const ll MOD = 1e9 + 7;
-const int M = 600;
-void solve() {
-    cout << 1 << endl;
+int main(){
     srand(time(0));
-    int l = rand() % M, r = rand() % M;
-    if (l > r) swap(l, r);
-    cout << l << ' ' << r << endl;
-    return;
-}
 
-signed main() {
-#if DEBUG
-    freopen("input.txt", "w", stdout);
-    auto start_time = chrono::steady_clock::now();
-#else
-    ios::sync_with_stdio(false);
-#endif
-    cin.tie(nullptr);
+    int n=3;
 
-    int t = 1;
-    // cin >> t;
+    cout<<n<<"\n";
 
-    while (t--) {
-        solve();
+    for(int i=1;i<=n;i++){
+        cout<<rand()%20+1<<" ";
     }
-
-#if DEBUG
-    auto end_time = chrono::steady_clock::now();
-    auto diff = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-    cerr << "Time: " << diff.count() << " ms" << endl;
-
-#endif
-
-    return 0;
+    cout<<"\n";
 }

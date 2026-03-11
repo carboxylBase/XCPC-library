@@ -3,6 +3,10 @@ using namespace std;
 typedef long long ll;
 const ll N = 2000000;
 
+/*
+一个易错点， 树状数组上二分的时候， 注意那个， 这个树状数组的下标是从 1 开始的
+这很重要！！！ 离散化的时候要对齐了
+*/
 struct BIT {
     int n;
     struct Info {
