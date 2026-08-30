@@ -1,0 +1,4 @@
+interface:
+  display_name: "XCPC Training Log"
+  short_description: "Archive daily problems, solutions, notes, and topic indexes"
+  default_prompt: "Archive this XCPC training problem using the repository conventions."
