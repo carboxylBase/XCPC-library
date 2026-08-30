@@ -1,0 +1,22 @@
+{
+	"qpow": {
+	"prefix": "tp_qpow",
+	"body": [
+		"ll qpow(ll base,ll k,ll mod) {",
+		"    if (base == 0) return 0;",
+		"    ll res = 1;",
+		"    base %= mod; base = (base + mod) % mod;",
+		"    k %= (mod - 1); k = (k + mod - 1) % (mod - 1);",
+		"    while (k) {",
+		"        if (k & 1) {",
+		"            res *= base; res %= mod;",
+		"        }",
+		"        k >>= 1;",
+		"        base *= base; base %= mod;",
+		"    }",
+		"    return res;",
+		"}"
+	],
+	"description": "qpow"
+	}
+}
