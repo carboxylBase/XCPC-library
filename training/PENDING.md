@@ -6,4 +6,3 @@
 
 | 题目 | 思路完成日期 | 当前进度 | 待办 |
 |---|---|---|---|
-| [CF506D - Mr. Kitayuta's Colorful Graph](2026/08/2026-08-31/CF506D-Mr-Kitayutas-Colorful-Graph/notes.md) | 2026-08-31 | 已推出完整根号分治并写出初版；已定位重复询问和有序映射问题 | 修正代码、提交验证并归档 `solution.cpp` |
