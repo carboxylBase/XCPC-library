@@ -9,7 +9,8 @@ Archive training under `training/YYYY/MM/YYYY-MM-DD/<platform><problem-id>-<shor
 
 For each problem:
 
-- Put the cleaned, independently compilable accepted implementation in `solution.cpp`.
+- When the user provides an implementation, put its cleaned, independently compilable accepted version in `solution.cpp`.
+- Do not author `solution.cpp` on the user's behalf unless the user explicitly asks for an implementation. If no user implementation is available, archive the notes without `solution.cpp`, mark the code as pending, and add it later when the user supplies it.
 - Put the learning record in `notes.md`. Reconstruct the user's actual thought process from the conversation when available; do not replace it with a generic editorial.
 - Add `attempt.cpp`, generators, or brute-force programs only when they have lasting diagnostic value.
 - Preserve the user's implementation style where reasonable, while removing local-only includes, forced file redirection, debug output, and other submission hazards from `solution.cpp`.
