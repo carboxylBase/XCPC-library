@@ -6,3 +6,4 @@
 
 | 题目 | 思路完成日期 | 当前进度 | 待办 |
 |---|---|---|---|
+| [CF559C - Gerald and Giant Chess](2026/09/2026-09-01/CF559C-Gerald-and-Giant-Chess/notes.md) | 2026-09-01 | 已独立推出按第一个黑格分类的 `O(n^2)` 计数 DP | 编写、提交并归档 `solution.cpp` |
