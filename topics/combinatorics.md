@@ -11,3 +11,9 @@
 - [CF451E - Devu and Flowers](../training/2026/09/2026-09-02/CF451E-Devu-and-Flowers/notes.md)
   - 当组合数上标可达 `1e14`、下标却至多为 19 时，直接计算短下降幂并乘小阶乘的逆元。
   - 广义组合数满足 `C(-n,t)=(-1)^t C(n+t-1,t)`，可用于解释负整数次幂的展开。
+
+## 满射计数
+
+- [CF1342E - Placing Rooks](../training/2026/09/2026-09-02/CF1342E-Placing-Rooks/notes.md)
+  - 从 `n` 个有标号元素到 `m` 个有标号集合的满射数为 `sum(-1)^(m-i) C(m,i)i^n`。
+  - 先由结构确定非空集合数 `m=n-k`，再选出具体集合并计算满射。
