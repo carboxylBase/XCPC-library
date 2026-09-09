@@ -1,5 +1,11 @@
 # 构造
 
+## 二进制线性划分
+
+- [Gym106550E - 高维几何](../training/2026/09/2026-09-09/CFGym106550E-High-Dimensional-Geometry/notes.md)
+  - 枚举所有非零 mask，按二进制内积奇偶划分两组；每组大小恰为一半，任意不同点对同组与异组次数固定。
+  - 翻转一位配对：固定 mask 翻点，证明大小均匀；固定点差翻 mask，证明点对计数均匀。
+
 ## 奇偶性与缩放
 
 - [CF1270E - Divide Points](../training/2026/09/2026-09-03/CF1270E-Divide-Points/notes.md)
