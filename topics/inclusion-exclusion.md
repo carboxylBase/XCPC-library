@@ -17,3 +17,9 @@
 - [CF1342E - Placing Rooks](../training/2026/09/2026-09-02/CF1342E-Placing-Rooks/notes.md)
   - 全部函数有 `m^n` 个；枚举被迫为空的目标集合，得到满射容斥 `sum(-1)^(m-i)C(m,i)i^n`。
   - 行覆盖与列覆盖再做一次集合并容斥，交集仅为 `k=0` 时的排列矩阵。
+
+## 约数莫比乌斯变换
+
+- [QOJ20240 - Exponent](../training/2026/10/2026-10-05/QOJ20240-Exponent/notes.md)
+  - F(d)=sum_(e|d)G(e)，将质因子指数当作坐标，对每个不同质因子逐维差分。
+  - 对全局 phi(n) 的质因子 p，降序执行 F(d)-=F(d/p)，O(omega(phi(n))*tau(phi(n))) 次更新恢复精确阶计数。
