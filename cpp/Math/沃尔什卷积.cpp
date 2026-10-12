@@ -3,6 +3,7 @@
 
 using namespace std;
 
+// 注意， 这个计算出来的数组是没有取模的
 template <typename T>
 struct FWTSolver {
     enum Type { OR = 0, AND = 1, XOR = 2 };

@@ -1,9 +1,493 @@
 # Summary
 Run summarize.bat to update this file.
-## Last Updated: 2026-01-30
+## Last Updated: 2026-05-30
 ## Author: HuangZy
 [TOC]
 ## DataStructure
+
+## FHQ-Treap.cpp
+```cpp
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
+
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+
+/*
+关于 FHQ-Treap 的易错点
+注意懒标记的作用顺序
+注意 unite 之后需要重新指定 rt 的值
+*/
+
+/*
+以下是文艺平衡树模版, 功能是对区间进行若干次翻转, 最终输出反转后结果
+这是根据 siz 进行反转的示例
+大概的思想是把 1-(l-1) 的部分切开, 然后切 l - r 的, 然后懒标记
+*/
+struct FHQ_Treap {
+    int ch[N][2], val[N], siz[N], rnd[N];
+    bool tag[N];
+    int tot, rt;
+
+    FHQ_Treap() {
+        tot = 0;
+        rt = 0;
+        memset(ch, 0, sizeof ch);
+        memset(siz, 0, sizeof siz);
+        memset(tag, 0, sizeof tag);
+        srand((unsigned)time(NULL));
+    }
+
+    int New(int v) {
+        ++tot;
+        val[tot] = v;
+        siz[tot] = 1;
+        rnd[tot] = rand();
+        tag[tot] = false;
+        ch[tot][0] = ch[tot][1] = 0;
+        return tot;
+    }
+
+    void push_up(int u) {
+        siz[u] = siz[ch[u][0]] + siz[ch[u][1]] + 1;
+    }
+
+    void push_down(int u) {
+        if (!u || !tag[u]) return;
+        tag[u] = false;
+        swap(ch[u][0], ch[u][1]);
+        if (ch[u][0]) tag[ch[u][0]] ^= 1;
+        if (ch[u][1]) tag[ch[u][1]] ^= 1;
+    }
+
+    void split(int u, int k, int &x, int &y) {
+        if (!u) { x = y = 0; return; }
+        push_down(u);
+        if (siz[ch[u][0]] < k) {
+            x = u;
+            split(ch[u][1], k - siz[ch[u][0]] - 1, ch[u][1], y);
+        } else {
+            y = u;
+            split(ch[u][0], k, x, ch[u][0]);
+        }
+        push_up(u);
+    }
+
+    int unite(int x, int y) {
+        if (!x || !y) return x + y;
+        if (rnd[x] < rnd[y]) {
+            push_down(x);
+            ch[x][1] = unite(ch[x][1], y);
+            push_up(x);
+            return x;
+        } else {
+            push_down(y);
+            ch[y][0] = unite(x, ch[y][0]);
+            push_up(y);
+            return y;
+        }
+    }
+
+    void insert(int v) {
+        int a, b;
+        split(rt, v, a, b);
+        rt = unite(unite(a, New(v)), b);
+    }
+
+    void reverse(int l, int r) {
+        int a, b, c;
+        split(rt, l - 1, a, b);
+        split(b, r - l + 1, b, c);
+        tag[b] ^= 1;
+        rt = unite(a, unite(b, c));
+    }
+
+    void dfs(int u) {
+        if (!u) return;
+        if (tag[u]) push_down(u);
+        dfs(ch[u][0]);
+        printf("%d ", val[u]);
+        dfs(ch[u][1]);
+    }
+
+    void print() { dfs(rt); }
+} solver;
+
+/*
+这个是按照值域分解的版本, 同时具有给指定值域的数加上一定值的功能
+*/
+
+struct FHQ_Treap {
+    int ch[N][2], rnd[N], idx[N];
+    int tot, rt;
+    ll val[N], laz[N];
+
+    FHQ_Treap() {
+        tot = 0;
+        rt = 0;
+        memset(ch, 0, sizeof ch);
+        memset(laz, 0, sizeof laz);
+        srand((unsigned)time(NULL));
+    }
+
+    void init() {
+        tot = rt = 0;
+    }
+
+    int New(int v, int id) {
+        ++tot;
+        val[tot] = v;
+        rnd[tot] = rand();
+        laz[tot] = 0;
+        idx[tot] = id;
+        ch[tot][0] = ch[tot][1] = 0;
+        return tot;
+    }
+
+    void push_down(int u) {
+        if (!u || !laz[u]) return;
+        for (int i = 0;i<2;i++) {
+            if (!ch[u][i]) continue;
+            val[ch[u][i]] += laz[u];
+            laz[ch[u][i]] += laz[u];
+        }
+        laz[u] = 0;
+    }
+
+    void split(int u, ll k, int &x, int &y) {
+        if (!u) { x = y = 0; return; }
+        push_down(u);
+        if (val[u] <= k) {
+            x = u;
+            split(ch[u][1], k, ch[u][1], y);
+        } else {
+            y = u;
+            split(ch[u][0], k, x, ch[u][0]);
+        }
+    }
+
+    int unite(int x, int y) {
+        if (!x || !y) return x + y;
+        if (rnd[x] < rnd[y]) {
+            push_down(x);
+            ch[x][1] = unite(ch[x][1], y);
+            return x;
+        } else {
+            push_down(y);
+            ch[y][0] = unite(x, ch[y][0]);
+            return y;
+        }
+    }
+
+    void insert(int v, int id) {
+        int a, b;
+        split(rt, v, a, b);
+        rt = unite(unite(a, New(v, id)), b);
+    }
+
+    void add(ll x) {
+        int a, b;
+        split(rt, x - 1, a, b);
+        if (b) {
+            val[b] += x;
+            laz[b] += x;
+        }
+        rt = unite(a, b);
+    }
+} solver;"\n"
+```
+
+## KD-Tree.cpp
+```cpp
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
+
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+
+// kd-tree, 好人类智慧。。。
+// kd-tree, 好好写。。。
+// 我就不信 xcpc 有人敢出 kd-tree
+
+/*
+二进制分组优化的 2D-Tree
+二进制优化分组是为了保持在线情形的复杂度
+不需要在线维护就直接一颗树就行了
+注意， nodes[0] 是哨兵节点不要用！！！
+插入均摊 log^2
+查询均摊 n^0.5
+*/
+
+struct KD_Tree {
+    struct Node {
+        int x[2];               // 坐标
+        int minC[2], maxC[2];   // 子树边界矩形
+        int val, sum;           // 点权值，子树总和
+        int ch[2];              // 左右儿子
+
+        void init(int _x, int _y, int _v) {
+            x[0] = minC[0] = maxC[0] = _x;
+            x[1] = minC[1] = maxC[1] = _y;
+            val = sum = _v;
+            ch[0] = ch[1] = 0;
+        }
+    } t[N];
+
+    int nodeCnt = 0;
+    int stk[N], tp;
+
+    // 更新节点的统计信息
+    void pushup(int p) {
+        t[p].sum = t[p].val + t[t[p].ch[0]].sum + t[t[p].ch[1]].sum;
+        for (int i = 0; i < 2; ++i) {
+            t[p].minC[i] = t[p].maxC[i] = t[p].x[i];
+            if (t[p].ch[0]) {
+                t[p].minC[i] = min(t[p].minC[i], t[t[p].ch[0]].minC[i]);
+                t[p].maxC[i] = max(t[p].maxC[i], t[t[p].ch[0]].maxC[i]);
+            }
+            if (t[p].ch[1]) {
+                t[p].minC[i] = min(t[p].minC[i], t[t[p].ch[1]].minC[i]);
+                t[p].maxC[i] = max(t[p].maxC[i], t[t[p].ch[1]].maxC[i]);
+            }
+        }
+    }
+
+    // 递归构建平衡 KD-Tree
+    int build(int l, int r, int dim) {
+        if (l > r) return 0;
+        int mid = (l + r) >> 1;
+        nth_element(stk + l, stk + mid, stk + r + 1, [&](int a, int b) {
+            return t[a].x[dim] < t[b].x[dim];
+        });
+        int p = stk[mid];
+        t[p].ch[0] = build(l, mid - 1, dim ^ 1);
+        t[p].ch[1] = build(mid + 1, r, dim ^ 1);
+        pushup(p);
+        return p;
+    }
+
+    // 展平子树
+    void flatten(int p) {
+        if (!p) return;
+        stk[++tp] = p;
+        flatten(t[p].ch[0]);
+        flatten(t[p].ch[1]);
+    }
+
+    // 核心查询逻辑
+    int query(int p, int x1, int y1, int x2, int y2) {
+        if (!p) return 0;
+        // 1. 完全包含
+        if (t[p].minC[0] >= x1 && t[p].maxC[0] <= x2 && t[p].minC[1] >= y1 && t[p].maxC[1] <= y2)
+            return t[p].sum;
+        // 2. 完全不相交
+        if (t[p].minC[0] > x2 || t[p].maxC[0] < x1 || t[p].minC[1] > y2 || t[p].maxC[1] < y1)
+            return 0;
+        // 3. 部分重叠
+        int res = 0;
+        if (t[p].x[0] >= x1 && t[p].x[0] <= x2 && t[p].x[1] >= y1 && t[p].x[1] <= y2)
+            res += t[p].val;
+        return res + query(t[p].ch[0], x1, y1, x2, y2) + query(t[p].ch[1], x1, y1, x2, y2);
+    }
+
+    // 二进制分组管理器
+    int roots[25], treeSize[25];
+    void insert(int x, int y, int v) {
+        int cur = ++nodeCnt;
+        t[cur].init(x, y, v);
+        
+        tp = 0;
+        stk[++tp] = cur;
+        
+        // 类似二进制加法：1 + 1 = 10 (进位合并)
+        for (int i = 0; i < 20; ++i) {
+            if (!roots[i]) {
+                roots[i] = build(1, tp, 0);
+                treeSize[i] = tp;
+                return;
+            }
+            flatten(roots[i]);
+            roots[i] = 0; // 清空当前层，准备合并到下一层
+            treeSize[i] = 0;
+        }
+    }
+} solver;
+
+// 这种写法， 就很优美!!
+const int M = 2;
+struct KD_Tree {
+    struct Node {
+        ll x[M], mn[M], mx[M], ch[M], val, sum;
+
+        void init(array<ll, M> y, ll _v) {
+			for (int i = 0;i<M;i++) {
+				x[i] = mn[i] = mx[i] = y[i];
+			}
+            val = sum = _v;
+            ch[0] = ch[1] = 0;
+        }
+    } nodes[N];
+
+    int nodeCnt = 0;
+    int stk[N], tp;
+
+	#define LS (nodes[rt].ch[0])
+	#define RS (nodes[rt].ch[1])
+
+    // 更新节点的统计信息
+    void pushup(int rt) {
+        nodes[rt].sum = nodes[rt].val + nodes[LS].sum + nodes[RS].sum;
+        for (int i = 0; i < 2; ++i) {
+            nodes[rt].mn[i] = nodes[rt].mx[i] = nodes[rt].x[i];
+            if (LS) {
+                nodes[rt].mn[i] = min(nodes[rt].mn[i], nodes[LS].mn[i]);
+                nodes[rt].mx[i] = max(nodes[rt].mx[i], nodes[LS].mx[i]);
+            }
+            if (RS) {
+                nodes[rt].mn[i] = min(nodes[rt].mn[i], nodes[RS].mn[i]);
+                nodes[rt].mx[i] = max(nodes[rt].mx[i], nodes[RS].mx[i]);
+            }
+        }
+    }
+
+    // 递归构建平衡 KD-Tree
+    int build(int l, int r, int dim) {
+        if (l > r) return 0;
+        int mid = (l + r) >> 1;
+        nth_element(stk + l, stk + mid, stk + r + 1, [&](int a, int b) {
+            return nodes[a].x[dim] < nodes[b].x[dim];
+        });
+        int rt = stk[mid];
+        nodes[rt].ch[0] = build(l, mid - 1, dim ^ 1);
+        nodes[rt].ch[1] = build(mid + 1, r, dim ^ 1);
+        pushup(rt);
+        return rt;
+    }
+
+    // 展平子树
+    void flatten(int rt) {
+        if (!rt) return;
+        stk[++tp] = rt;
+        flatten(nodes[rt].ch[0]);
+        flatten(nodes[rt].ch[1]);
+    }
+
+	ll get_mn(int rt, array<ll, M> v) {
+		ll res = 0;
+		if (nodes[rt].mx[0] < v[0]) {
+			res += v[0] - nodes[rt].mx[0];
+		} else if (nodes[rt].mn[0] > v[0]) {
+			res += nodes[rt].mn[0] - v[0];
+		}
+		if (nodes[rt].mx[1] < v[1]) {
+			res += v[1] - nodes[rt].mx[1];
+		} else if (nodes[rt].mn[1] > v[1]) {
+			res += nodes[rt].mn[1] - v[1];
+		}
+		return res;
+	}
+
+	ll get_mx(int rt, array<ll, M> v) {
+		ll res = 0;
+		res += max(abs(nodes[rt].mx[0] - v[0]), abs(nodes[rt].mn[0] - v[0]));
+		res += max(abs(nodes[rt].mx[1] - v[1]), abs(nodes[rt].mn[1] - v[1]));
+		return res;
+	}
+
+	void queryMn(int rt, array<ll, M> v, ll &mn) {
+		if (!rt) return;
+        if (nodes[rt].x[0] == v[0] && nodes[rt].x[1] == v[1]) {
+
+		} else {
+			mn = min(mn, abs(v[0] - nodes[rt].x[0]) + abs(v[1] - nodes[rt].x[1]));
+		}
+		ll lhs = INF, rhs = INF;
+		if (LS) lhs = get_mn(LS, v);
+		if (RS) rhs = get_mn(RS, v);
+		if (lhs > rhs) {
+			if (rhs < mn) queryMn(RS, v, mn);
+			if (lhs < mn) queryMn(LS, v, mn); 
+		} else {
+			if (lhs < mn) queryMn(LS, v, mn); 
+			if (rhs < mn) queryMn(RS, v, mn);
+		}
+		return;
+	}
+
+	void queryMx(int rt, array<ll, M> v, ll &mx) {
+		if (!rt) return;
+        mx = max(mx, abs(v[0] - nodes[rt].x[0]) + abs(v[1] - nodes[rt].x[1]));
+		ll lhs = -INF, rhs = -INF;
+		if (LS) lhs = get_mx(LS, v);
+		if (RS) rhs = get_mx(RS, v);
+		if (lhs < rhs) {
+			if (rhs > mx) queryMx(RS, v, mx);
+			if (lhs > mx) queryMx(LS, v, mx); 
+		} else {
+			if (lhs > mx) queryMx(LS, v, mx); 
+			if (rhs > mx) queryMx(RS, v, mx);
+		}
+	}
+
+    // 核心查询逻辑
+    ll query(array<ll, M> v) {
+		ll mn = INF, mx = -INF;
+		queryMn(roots[0], v, mn);
+		queryMx(roots[0], v, mx);
+		return mx - mn;
+    }
+
+    // 二进制分组管理器
+    int roots[25], treeSize[25];
+    void insert(array<ll, M> y, ll v) {
+        int cur = ++nodeCnt;
+        nodes[cur].init(y, v);
+        
+        tp = 0;
+        stk[++tp] = cur;
+        
+        // 类似二进制加法：1 + 1 = 10 (进位合并)
+        for (int i = 0; i < 20; ++i) {
+            if (!roots[i]) {
+                roots[i] = build(1, tp, 0);
+                treeSize[i] = tp;
+                return;
+            }
+            flatten(roots[i]);
+            roots[i] = 0; // 清空当前层，准备合并到下一层
+            treeSize[i] = 0;
+        }
+    }
+} solver;"\n"
+```
 
 ## Link-Cut-Tree.cpp
 ```cpp
@@ -893,6 +1377,58 @@ struct Dsu{
         fa[x] = y;
         return;
     }
+};
+
+struct dsu {
+    struct edge {
+        int x, y, sx;
+        bool ok;
+    };
+
+    static const int N = 2000005;
+
+    int fa[N], sz[N], top;
+    edge st[N];
+
+    void init(int n) {
+        top = 0;
+        for (int i = 1; i <= n; i++) {
+            fa[i] = i;
+            sz[i] = 1;
+        }
+    }
+
+    int find(int x) {
+        while (x != fa[x]) x = fa[x];
+        return x;
+    }
+
+    bool merge(int u, int v) {
+        int x = find(u), y = find(v);
+
+        if (x == y) {
+            st[++top] = {x, y, sz[x], false};
+            return false;
+        }
+
+        if (sz[x] < sz[y]) swap(x, y);
+
+        st[++top] = {x, y, sz[x], true};
+
+        fa[y] = x;
+        sz[x] += sz[y];
+
+        return true;
+    }
+
+    void back() {
+        edge e = st[top--];
+
+        if (!e.ok) return;
+
+        fa[e.y] = e.y;
+        sz[e.x] = e.sx;
+    }
 };"\n"
 ```
 
@@ -1160,6 +1696,177 @@ struct DsuOnTree {
 };"\n"
 ```
 
+## 树套树.cpp
+```cpp
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
+
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+const ll M = 1e8 + 10;
+
+/*
+这是一个树状数组套线段树的代码
+树套树的细节还是非常多的
+得写的很细很细才可以
+*/
+
+int n;
+namespace TWT {
+    #define ls(rt) nodes[rt].ch[0]
+    #define rs(rt) nodes[rt].ch[1]
+    struct Node {
+        int ch[2], sum;
+        Node() {
+            ch[0] = ch[1] = sum = 0;
+        }
+    } nodes[N * 4];
+
+    int tp, rt[N];
+    void init() {
+        tp = 0;
+        for (int i = 1;i<n+1;i++) {
+            rt[i] = 0;
+        }
+    }
+
+    int New() {
+        nodes[++ tp] = Node();
+        return tp;
+    }
+
+    void push_up(int rt) {
+        nodes[rt].sum = 0;
+        if (ls(rt)) {
+            nodes[rt].sum += nodes[ls(rt)].sum; 
+        }
+        if (rs(rt)) {
+            nodes[rt].sum += nodes[rs(rt)].sum;
+        }
+        return;
+    }
+
+    void seg_update(int& rt, int l, int r, int q, int v) {
+        if (!rt) rt = New();
+        if (l == r) {
+            nodes[rt].sum += v;
+            return;
+        }
+        int mid = l + r >> 1;
+        if (q <= mid) seg_update(ls(rt), l, mid, q, v);
+        else seg_update(rs(rt), mid + 1, r, q, v);
+        push_up(rt);
+        return;
+    }
+
+    int seg_query(int rt, int l, int r, int ql, int qr) {
+        if (!rt) return 0;
+        if (qr < l || r < ql || ql > qr) return 0;
+        if (ql <= l && r <= qr) return nodes[rt].sum;
+        int mid = l + r >> 1;
+        return seg_query(ls(rt), l, mid, ql, qr) + seg_query(rs(rt), mid + 1, r, ql, qr);
+    }
+
+    int lowbit(int x) { return x & -x; }
+
+    void update(int x, int v, int c) {
+        while (x <= n) {
+            seg_update(rt[x], 0, M, v, c);
+            x += lowbit(x);
+        }
+        return;
+    }
+
+    int query(int x, int k) {
+        if (x == 0) return 0;
+        int ans = 0;
+        while (x) {
+            ans += seg_query(rt[x], 0, M, 0, k - 1);
+            x -= lowbit(x);
+        }
+        return ans;
+    }
+
+    int query(int l, int r, int k) {
+        return query(r, k) - query(l - 1, k);
+    }
+
+    int L[N], R[N], tpL, tpR;
+    int findK(int l, int r, int k) {
+        tpL = tpR = 0;
+        while (r) {
+            R[tpR ++] = rt[r];
+            r -= lowbit(r);
+        }
+        l --;
+        while (l) {
+            L[tpL ++] = rt[l];
+            l -= lowbit(l);
+        }
+
+        l = 0, r = M;
+        while (l < r) {
+            int mid = l + r >> 1;
+            int tot = 0;
+            for (int j = 0;j<tpL;j++) {
+                tot -= nodes[ls(L[j])].sum;
+            }
+            for (int j = 0;j<tpR;j++) {
+                tot += nodes[ls(R[j])].sum;
+            }
+            if (tot >= k) {
+                for (int j = 0;j<tpL;j++) {
+                    L[j] = ls(L[j]);
+                }
+                for (int j = 0;j<tpR;j++) {
+                    R[j] = ls(R[j]);
+                }
+                r = mid;
+            } else {
+                k -= tot;
+                for (int j = 0;j<tpL;j++) {
+                    L[j] = rs(L[j]);
+                }
+                for (int j = 0;j<tpR;j++) {
+                    R[j] = rs(R[j]);
+                }
+                l = mid + 1;
+            }
+        }
+        return l;
+    }
+
+    int get4(int l, int r, int k) {
+        k = query(l, r, k);
+        if (k == 0) return -2147483647;
+        return findK(l, r, k);
+    }
+
+    int get5(int l, int r, int k) {
+        k = query(l, r, k + 1);
+        if (k >= r - l + 1) return 2147483647;
+        int ans = findK(l, r, k + 1);
+        return ans;
+    }
+};
+using namespace TWT;
+"\n"
+```
+
 ## 树状数组.cpp
 ```cpp
 #include <bits/stdc++.h>
@@ -1167,6 +1874,10 @@ using namespace std;
 typedef long long ll;
 const ll N = 2000000;
 
+/*
+一个易错点， 树状数组上二分的时候， 注意那个， 这个树状数组的下标是从 1 开始的
+这很重要！！！ 离散化的时候要对齐了
+*/
 struct BIT {
     int n;
     struct Info {
@@ -1482,91 +2193,6 @@ struct SegTree{
     }
 };
 
-class SegTreePlusMul{
-struct Node{
-    ll sum,plus,mul,len;
-};
-private:
-    Node nodes[N];
-public:
-    ll mod;
-    Node merge(Node A,Node B){
-        Node C;
-        C.plus = 0;
-        C.mul = 1;
-        C.sum = (A.sum + B.sum) % mod;
-        C.len = A.len + B.len;
-        return C;
-    }
-    void build(ll rt,ll l,ll r){
-        if (l==r){
-            cin >> nodes[rt].sum;
-            nodes[rt].len = 1;
-            nodes[rt].plus = 0;
-            nodes[rt].mul = 1;
-            return;
-        }
-        ll mid = l+r>>1;
-        build(LS,l,mid),build(RS,mid+1,r);
-        nodes[rt] = merge(nodes[LS],nodes[RS]);
-    }
-    void pushDown(int rt){
-        nodes[RS].sum = (nodes[RS].sum*nodes[rt].mul%mod+nodes[rt].plus*nodes[RS].len%mod) % mod;
-        nodes[LS].sum = (nodes[RS].sum*nodes[rt].mul%mod+nodes[rt].plus*nodes[LS].len%mod) % mod;
-
-        nodes[RS].mul = (nodes[RS].mul*nodes[rt].mul) % mod;
-        nodes[LS].mul = (nodes[LS].mul*nodes[rt].mul) % mod;
-
-        nodes[RS].plus = (nodes[RS].plus*nodes[rt].mul+nodes[rt].plus) % mod;
-        nodes[LS].plus = (nodes[LS].plus*nodes[rt].mul+nodes[rt].plus) % mod;
-
-        nodes[rt].plus = 0;
-        nodes[rt].mul = 1;
-    }
-    void update(ll rt,ll l,ll r,ll ql,ll qr,ll mode,ll k){
-        if (ql <= l && r <= qr){
-            if (mode == 1){
-                nodes[rt].plus += k;
-                nodes[rt].plus %= mod;
-                nodes[rt].sum += (k * nodes[rt].len) % mod;
-                nodes[rt].sum %= mod;
-            }else{
-                nodes[rt].plus *= k;
-                nodes[rt].plus %= mod;
-                nodes[rt].mul *= k;
-                nodes[rt].mul %= mod;
-                nodes[rt].sum *= k;
-                nodes[rt].sum %= mod;
-            }
-            return;
-        }
-        pushDown(rt);
-        ll mid = l+r>>1;
-        if (ql<=mid){
-            update(LS,l,mid,ql,qr,mode,k);
-        }
-        if (qr >= mid+1){
-            update(RS,mid+1,r,ql,qr,mode,k);
-        }
-        nodes[rt] = merge(nodes[LS],nodes[RS]);
-    }
-    Node query(ll rt,ll l,ll r,ll ql,ll qr){
-        if (ql <= l && r <= qr){
-            return nodes[rt];
-        }
-        pushDown(rt);
-        ll mid = l+r>>1;
-        if (qr<=mid){
-            return query(LS,l,mid,ql,qr);
-        }else if (ql>=mid+1){
-            return query(RS,mid+1,r,ql,qr);
-        }else{
-            return merge(query(LS,l,mid,ql,qr),query(RS,mid+1,r,ql,qr));
-        }
-    }
-};
-
-
 // 调用前先 init
 #define LS nodes[rt].ls
 #define RS nodes[rt].rs
@@ -1731,7 +2357,118 @@ struct DynamicSegTree {
 	}
 } solver;
 
-"\n"
+
+/*
+线段树合并以及线段树分裂的整合代码
+细节还是比较多的, 比如说, 注意这个 split 之后的 pushUp
+*/
+namespace SegTree {
+    struct Node {
+        int ch[2];
+        ll cnt, sum;
+        Node() {
+            ch[0] = ch[1] = cnt = sum = 0;
+        }
+    } nodes[N * 4];
+    int tp;
+
+    void init() { tp = 0; }
+
+    int New() {
+        ++ tp;
+        nodes[tp] = Node();
+        return tp;
+    }
+
+    #define ls(x) nodes[x].ch[0]
+    #define rs(x) nodes[x].ch[1]
+
+    void push_up(int rt) {
+        nodes[rt].sum = nodes[rt].cnt = 0;
+        if (ls(rt)) {
+            nodes[rt].sum += nodes[ls(rt)].sum;
+            nodes[rt].cnt += nodes[ls(rt)].cnt;
+        }
+        if (rs(rt)) {
+            nodes[rt].sum += nodes[rs(rt)].sum;
+            nodes[rt].cnt += nodes[rs(rt)].cnt;
+        }
+        return;
+    }
+
+    void update(int &rt, int l, int r, int q, ll c) {
+        if (!rt) rt = New();
+        if (l == r) {
+            nodes[rt].sum += c;
+            nodes[rt].cnt += c;
+            return;
+        }
+        int mid = l + r >> 1;
+        if (q <= mid) update(ls(rt), l, mid, q, c);
+        else update(rs(rt), mid + 1, r, q, c);
+        push_up(rt);
+        return;
+    }
+
+    ll query(int rt, int l, int r, int ql, int qr) {
+        if (!rt) return 0;
+        if (qr < l || ql > r || ql > qr) return 0;
+        if (ql <= l && r <= qr) return nodes[rt].sum;
+        int mid = l + r >> 1;
+        return query(ls(rt), l, mid, ql, qr) + query(rs(rt), mid + 1, r, ql, qr);
+    }
+
+    int findK(int rt, int l, int r, ll k) {
+        if (!rt || nodes[rt].sum < k) return -1;
+        if (l == r) return l;
+        int mid = l + r >> 1;
+        if (nodes[ls(rt)].sum >= k) {
+            return findK(ls(rt), l, mid, k);
+        } else {
+            k -= nodes[ls(rt)].sum;
+            return findK(rs(rt), mid + 1, r, k);
+        }
+    }
+
+    int merge(int x, int y, int l, int r) {
+        if (!x || !y) return x + y;
+        if (l == r) {
+            nodes[x].cnt += nodes[y].cnt;
+            nodes[x].sum += nodes[y].sum;
+            return x;
+        }
+        int mid = l + r >> 1;
+        ls(x) = merge(ls(x), ls(y), l, mid);
+        rs(x) = merge(rs(x), rs(y), mid + 1, r);
+        push_up(x);
+        return x;
+    }
+
+    void split(int x, int& y, int l, int r, ll k) {
+        if (!k) return;
+        if (!y) y = New();
+        if (l == r) {
+            // assert(nodes[x].sum >= k);
+            nodes[x].cnt -= k;
+            nodes[x].sum -= k;
+            nodes[y].cnt += k;
+            nodes[y].sum += k;
+            return;
+        }
+        int mid = l + r >> 1;
+        if (nodes[ls(x)].sum <= k) {
+            k -= nodes[ls(x)].sum;
+            nodes[y].ch[0] = ls(x);
+            ls(x) = 0;
+            split(rs(x), rs(y), mid + 1, r, k);
+        } else {
+            split(ls(x), ls(y), l, mid, k);
+        }
+        push_up(x); push_up(y);
+        return;
+    }
+};
+using namespace SegTree;"\n"
 ```
 
 ## 高精度.cpp
@@ -1893,140 +2630,145 @@ public:
 using namespace std;
 typedef long long ll;
 
+using db = double;
+const db eps = 1e-9;
+
+struct Point {
+    double x, y;
+    Point operator-(const Point& b) const { return {x - b.x, y - b.y}; }
+    Point operator+(const Point& b) const { return {x + b.x, y + b.y}; }
+    Point operator*(double k) const { return {x * k, y * k}; }
+    double operator^(const Point& b) const { return x * b.y - y * b.x; }
+    double operator&(const Point& b) const { return x * b.x + y * b.y; }
+    double len2() const { return x * x + y * y; }
+    double len() const { return sqrt(len2()); }
+};
+
+Point rotate90(Point &v) { return {-v.y, v.x}; }
+
+vector<Point> getConvexHull(vector<Point>& p) {
+    int n = p.size();
+    sort(p.begin(), p.end(), [](Point a, Point b) {
+        return a.x < b.x || (abs(a.x - b.x) < eps && a.y < b.y);
+    });
+    vector<Point> hull;
+    for (int i = 0; i < n; ++i) {
+        while (hull.size() > 1 && ((hull.back() - hull[hull.size() - 2]) ^ (p[i] - hull.back())) <= eps)
+            hull.pop_back();
+        hull.push_back(p[i]);
+    }
+    int k = hull.size();
+    for (int i = n - 2; i >= 0; --i) {
+        while (hull.size() > k && ((hull.back() - hull[hull.size() - 2]) ^ (p[i] - hull.back())) <= eps)
+            hull.pop_back();
+        hull.push_back(p[i]);
+    }
+    hull.pop_back();
+    return hull;
+}"\n"
+```
+
+## 半平面交.cpp
+```cpp
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
+
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
 /*
-使用说明:
-手动输入点的数量n,各个点的坐标,然后init即可找出凸包.
-可以处理重点,不会出现三点共线的问题.
-默认double.
-使用极角排序的方式寻找凸包.
-注意下标从 1 开始
+观察 getS 函数， 发现最后 tail 和 head 之间的就是半平面交的凸包
+复杂度是 nlogn
 */
 
-template<typename T>
+const db eps = 1e-10;
+
 struct Point {
-    T x, y;
-	int idx;
-    Point(T X = 0, T Y = 0) {
-        x = X;
-        y = Y;
-    }
+    db x, y;
+    Point operator-(const Point& b) const { return {x - b.x, y - b.y}; }
+    Point operator+(const Point& b) const { return {x + b.x, y + b.y}; }
+    Point operator*(db k) const { return {x * k, y * k}; }
+    db operator^(const Point& b) const { return x * b.y - y * b.x; }
+};
 
-    Point operator-(const Point& A) const {
-        return Point(x - A.x, y - A.y);
+struct Line {
+    Point p1, p2;
+    db angle;
+    Line() {}
+    Line(Point a, Point b) : p1(a), p2(b) {
+        angle = atan2(b.y - a.y, b.x - a.x);
     }
+};
 
-    Point operator+(const Point& A) const{
-        return Point(x + A.x,y + A.y);
+Point getIntersect(Line a, Line b) {
+    Point v1 = a.p2 - a.p1;
+    Point v2 = b.p2 - b.p1;
+    Point u = a.p1 - b.p1;
+    db t = (v2 ^ u) / (v1 ^ v2);
+    return a.p1 + v1 * t;
+}
+
+bool isRight(Line l, Point p) {
+    return ((l.p2 - l.p1) ^ (p - l.p1)) < -eps;
+}
+
+db getS(vector<Line>& lines) {
+    sort(lines.begin(), lines.end(), [](Line a, Line b) {
+        if (abs(a.angle - b.angle) > eps) return a.angle < b.angle;
+        return ((a.p2 - a.p1) ^ (b.p2 - a.p1)) < -eps;
+    });
+
+    int n = lines.size();
+    int m = 0;
+    for (int i = 0; i < n; i++) {
+        if (i > 0 && abs(lines[i].angle - lines[i - 1].angle) < eps) continue;
+        lines[m++] = lines[i];
     }
+    lines.erase(lines.begin() + m, lines.end());
 
-    T operator^(const Point& A) const {
-        return x * A.y - A.x * y;
-    }
+    int head = 0, tail = 0;
+    vector<Line> dq(lines.size() + 5);
+    vector<Point> p(lines.size() + 5);
 
-    T operator*(const Point& A) const {
-        return x * A.x + y * A.y;
-    }
-
-    double len() {
-        return sqrt(x * x + y * y);
-    }
-
-    T len2() {
-        return x * x + y * y;
-    }
-
-    bool operator==(const Point& A) const {
-        return (x == A.x) && (y == A.y);
-    }
-} ;
-
-template<typename T, int N>
-class ConvexHull {
-public:
-    int n;
-	bool vis[N];
-    Point<T> points[N], hull[N];
-    static bool cmp_y(const Point<T>& A, const Point<T>& B) {
-		if (A.y == B.y){
-			return A.x < B.x;
-		}
-        return A.y < B.y;
-    }
-
-    static bool cmp_sita(const Point<T>& A, const Point<T>& B, const Point<T>& base) {
-        Point<T> A_base = A - base;
-        Point<T> B_base = B - base;
-        if ((A_base ^ B_base) == 0) {
-            return A_base.len() > B_base.len();
+    dq[tail++] = lines[0];
+    for (int i = 1; i < (int)lines.size(); i++) {
+        while (tail - head > 1 && isRight(lines[i], p[tail - 1])) tail--;
+        while (tail - head > 1 && isRight(lines[i], p[head + 1])) head++;
+        
+        dq[tail++] = lines[i];
+        if (abs((dq[tail - 1].p2 - dq[tail - 1].p1) ^ (dq[tail - 2].p2 - dq[tail - 2].p1)) < eps) {
+            tail--;
+            if (!isRight(dq[tail], lines[i].p1)) dq[tail] = lines[i];
         }
-        return (A_base ^ B_base) < 0;
+        if (tail - head > 1) p[tail - 1] = getIntersect(dq[tail - 2], dq[tail - 1]);
     }
 
-    int tp;
+    while (tail - head > 1 && isRight(dq[head], p[tail - 1])) tail--;
+    while (tail - head > 1 && isRight(dq[tail - 1], p[head + 1])) head++;
 
-    void init() {
-        tp = 1;
-        sort(points + 1, points + 1 + n, cmp_y);
-        hull[1] = points[1];
-        sort(points + 2, points + 1 + n, [&base = hull[1]](const Point<T>& A, const Point<T>& B) { return cmp_sita(A, B, base); });
-        int cur = 2;
-        for (; cur <= n; cur++) {
-            if (points[cur] == hull[1]) continue;
-            else { hull[++tp] = points[cur]; break;}
-        }
-        for (cur++; cur <= n; cur++) {
-			if (hull[tp] == points[cur]) continue;
-            Point L = hull[tp] - hull[tp - 1];
-            Point R = points[cur] - hull[tp];
-            if (R.x == 0 && R.y == 0) continue;
-            if ((L ^ R) > 0) {
-				while ((L ^ R) >= 0 && tp > 1){
-					if ((L ^ R) == 0){
-						if ((L * R) < 0){
-							break;
-						}else{
-							--tp;break;
-						}
-					}
-					tp--;
-					L = hull[tp] - hull[tp - 1];
-					R = points[cur] - hull[tp];
-				}
-                hull[++tp] = points[cur];
-            } else if ((L ^ R) < 0) {
-                hull[++tp] = points[cur];
-            } else {
-                if ((L * R) < 0) {
-                    continue;
-                } else {
-                    hull[tp] = points[cur];
-                }
-            }
-        }
-    }
+    if (tail - head < 3) return 0.0;
 
-    double len(Point<T> x) {
-        return sqrt(x.x * x.x + x.y * x.y);
-    }
+    p[head] = getIntersect(dq[tail - 1], dq[head]);
 
-    double getS() {
-        double ans = 0;
-        for (int i = 2;i+1<=tp;i++) {
-            ans += ((hull[i] - hull[1]) ^ (hull[i + 1] - hull[1]));
-        }
-        ans = abs(ans) / 2;
-        return ans;
+    db area = 0;
+    for (int i = head; i < tail; i++) {
+        area += (p[i] ^ p[i == tail - 1 ? head : i + 1]);
     }
-
-    double getC() {
-        double ans = 0;
-        for (int i = 1;i+1<=tp;i++) {
-            ans += len(hull[i + 1] - hull[i]);
-        }
-        ans += len(hull[1] - hull[tp]);
-        return ans;
-    }
-} ;"\n"
+    return abs(area) / 2.0;
+}"\n"
 ```
 
 ## 圆的并.cpp
@@ -2189,6 +2931,92 @@ auto closest_pair_sq(vector<pair<T,T>>& a){
 
     return rec(0, (int)a.size());
 }
+"\n"
+```
+
+## 旋转卡壳.cpp
+```cpp
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
+
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+
+namespace Rotating_Calipers {
+
+struct Point {
+    ll x, y;
+    Point operator-(const Point& b) const { return {x - b.x, y - b.y}; }
+    ll operator^(const Point& b) const { return x * b.y - y * b.x; }
+};
+
+ll distSq(Point a, Point b) {
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+
+ll cross_product(Point a, Point b, Point c) {
+    return (b - a) ^ (c - a);
+}
+
+vector<Point> getConvexHull(vector<Point>& pts) {
+    int n = pts.size();
+    if (n <= 2) return pts;
+    sort(pts.begin(), pts.end(), [](Point a, Point b) {
+        return a.x < b.x || (a.x == b.x && a.y < b.y);
+    });
+
+    vector<Point> hull;
+    for (int i = 0; i < n; ++i) {
+        while (hull.size() >= 2 && cross_product(hull[hull.size() - 2], hull.back(), pts[i]) <= 0) {
+            hull.pop_back();
+        }
+        hull.push_back(pts[i]);
+    }
+    int lower_size = hull.size();
+    for (int i = n - 2; i >= 0; --i) {
+        while (hull.size() > lower_size && cross_product(hull[hull.size() - 2], hull.back(), pts[i]) <= 0) {
+            hull.pop_back();
+        }
+        hull.push_back(pts[i]);
+    }
+    hull.pop_back();
+    return hull;
+}
+
+ll rotatingCalipers(const vector<Point>& hull) {
+    int m = hull.size();
+    if (m == 2) return distSq(hull[0], hull[1]);
+
+    ll max_dist = 0;
+    int j = 1;
+
+    for (int i = 0; i < m; i++) {
+        int next_i = (i + 1) % m;
+        while (abs(cross_product(hull[i], hull[next_i], hull[(j + 1) % m])) > 
+               abs(cross_product(hull[i], hull[next_i], hull[j]))) {
+            j = (j + 1) % m;
+        }
+        max_dist = max({max_dist, distSq(hull[i], hull[j]), distSq(hull[next_i], hull[j])});
+    }
+    return max_dist;
+}
+
+};
+using namespace Rotating_Calipers;
 "\n"
 ```
 
@@ -4928,16 +5756,17 @@ using namespace polystd;
 */
 #define DEBUG 1
 #define FUCK cout << "fuck" << endl;
+
 #if DEBUG
-    #include "all.hpp"
+#include "all.hpp"
 #else
-    #include <bits/stdc++.h>
+#include <bits/stdc++.h>
 #endif
 
 using namespace std;
 using ll = long long;
-using pii = pair<int,int>;
-using pll = pair<ll,ll>;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
 using db = long double;
 using pdd = pair<db, db>;
 using i128 = __int128_t;
@@ -4952,134 +5781,176 @@ const ll MOD = 998244353;
 */
 
 namespace poly {
-    ll qpow(ll base,ll k) {
+
+    ll qpow(ll base, ll k) {
         if (base == 0) return 0;
         ll res = 1;
         base %= MOD; base = (base + MOD) % MOD;
         k %= (MOD - 1); k = (k + MOD - 1) % (MOD - 1);
         while (k) {
             if (k & 1) {
-                res *= base; res %= MOD;
+                res = res * base % MOD;
             }
+            base = base * base % MOD;
             k >>= 1;
-            base *= base; base %= MOD;
         }
         return res;
     }
+
     ll inv(ll x) {
         return qpow(x, MOD - 2);
     }
+
     mt19937 MT;
+
     using Poly = vector<ll>;
     #define lg(x) ((x) == 0 ? -1 : __lg(x))
     #define Size(x) int(x.size())
+
     namespace NTT_ns {
-    const long long G = 3, invG = inv(G);
-    vector<int> rev;
-    void NTT(ll* F, int len, int sgn) {
-        rev.resize(len);
-        for (int i = 1; i < len; ++i) {
-        rev[i] = (rev[i >> 1] >> 1) | ((i & 1) * (len >> 1));
-        if (i < rev[i]) swap(F[i], F[rev[i]]);
-        }
-        for (int tmp = 1; tmp < len; tmp <<= 1) {
-        ll w1 = qpow(sgn ? G : invG,
-            (MOD - 1) / (tmp << 1));
-        for (int i = 0; i < len; i += tmp << 1){
-            for(ll j = 0, w = 1; j < tmp; ++j,
-                w = w * w1 % MOD) {
-            ll x = F[i + j];
-            ll y = F[i + j + tmp] * w % MOD;
-            F[i + j] = (x + y) % MOD;
-            F[i + j + tmp] = (x - y + MOD) % MOD;
+        const long long G = 3, invG = inv(G);
+        vector<int> rev;
+
+        void NTT(ll* F, int len, int sgn) {
+            rev.resize(len);
+            for (int i = 1; i < len; ++i) {
+                rev[i] = (rev[i >> 1] >> 1) | ((i & 1) * (len >> 1));
+                if (i < rev[i]) swap(F[i], F[rev[i]]);
+            }
+
+            for (int tmp = 1; tmp < len; tmp <<= 1) {
+                ll w1 = qpow(sgn ? G : invG, (MOD - 1) / (tmp << 1));
+                for (int i = 0; i < len; i += tmp << 1) {
+                    for (ll j = 0, w = 1; j < tmp; ++j, w = w * w1 % MOD) {
+                        ll x = F[i + j];
+                        ll y = F[i + j + tmp] * w % MOD;
+                        F[i + j]         = (x + y) % MOD;
+                        F[i + j + tmp]   = (x - y + MOD) % MOD;
+                    }
+                }
+            }
+
+            if (sgn == 0) {
+                ll inv_len = inv(len);
+                for (int i = 0; i < len; ++i)
+                    F[i] = F[i] * inv_len % MOD;
             }
         }
-        }
-        if (sgn == 0) {
-        ll inv_len = inv(len);
-        for (int i = 0; i < len; ++i)
-            F[i] = F[i] * inv_len % MOD;
-        }
     }
-    }
+
     using NTT_ns::NTT;
-    Poly operator * (Poly F, Poly G) {
-    int siz = Size(F) + Size(G) - 1;
-    int len = 1 << (lg(siz - 1) + 1);
-    if (siz <= 300) {
-        Poly H(siz);
-        for (int i = Size(F) - 1; ~i; --i)
-        for (int j = Size(G) - 1; ~j; --j)
-            H[i + j] =(H[i + j] + F[i] * G[j])%MOD;
-        return H;
+
+    Poly operator*(Poly F, Poly G) {
+        int siz = Size(F) + Size(G) - 1;
+        int len = 1 << (lg(siz - 1) + 1);
+
+        if (siz <= 300) {
+            Poly H(siz);
+            for (int i = Size(F) - 1; ~i; --i)
+                for (int j = Size(G) - 1; ~j; --j)
+                    H[i + j] = (H[i + j] + F[i] * G[j]) % MOD;
+            return H;
+        }
+
+        F.resize(len);
+        G.resize(len);
+
+        NTT(F.data(), len, 1);
+        NTT(G.data(), len, 1);
+
+        for (int i = 0; i < len; ++i)
+            F[i] = F[i] * G[i] % MOD;
+
+        NTT(F.data(), len, 0);
+        F.resize(siz);
+        return F;
     }
-    F.resize(len), G.resize(len);
-    NTT(F.data(), len, 1),NTT(G.data(), len, 1);
-    for (int i = 0; i < len; ++i)
-        F[i] = F[i] * G[i] % MOD;
-    NTT(F.data(), len, 0), F.resize(siz);
-    return F;
+
+    Poly operator+(Poly F, Poly G) {
+        int siz = max(Size(F), Size(G));
+        F.resize(siz);
+        G.resize(siz);
+        for (int i = 0; i < siz; ++i)
+            F[i] = (F[i] + G[i]) % MOD;
+        return F;
     }
-    Poly operator + (Poly F, Poly G) {
-    int siz = max(Size(F), Size(G));
-    F.resize(siz), G.resize(siz);
-    for (int i = 0; i < siz; ++i)
-        F[i] = (F[i] + G[i]) % MOD;
-    return F;
+
+    Poly operator-(Poly F, Poly G) {
+        int siz = max(Size(F), Size(G));
+        F.resize(siz);
+        G.resize(siz);
+        for (int i = 0; i < siz; ++i)
+            F[i] = (F[i] - G[i] + MOD) % MOD;
+        return F;
     }
-    Poly operator - (Poly F, Poly G) {
-    int siz = max(Size(F), Size(G));
-    F.resize(siz), G.resize(siz);
-    for (int i = 0; i < siz; ++i)
-        F[i] = (F[i] - G[i] + MOD) % MOD;
-    return F;
-    }
+
     Poly lsh(Poly F, int k) {
-    F.resize(Size(F) + k);
-    for (int i = Size(F) - 1; i >= k; --i)
-        F[i] = F[i - k];
-    for (int i = 0; i < k; ++i) F[i] = 0;
-    return F;
+        F.resize(Size(F) + k);
+        for (int i = Size(F) - 1; i >= k; --i)
+            F[i] = F[i - k];
+        for (int i = 0; i < k; ++i)
+            F[i] = 0;
+        return F;
     }
+
     Poly rsh(Poly F, int k) {
-    int siz = Size(F) - k;
-    for (int i = 0; i < siz;++i)F[i] = F[i + k];
-    return F.resize(siz), F;
+        int siz = Size(F) - k;
+        for (int i = 0; i < siz; ++i)
+            F[i] = F[i + k];
+        F.resize(siz);
+        return F;
     }
+
     Poly cut(Poly F, int len) {
-    return F.resize(len), F;
+        F.resize(len);
+        return F;
     }
+
     Poly der(Poly F) {
-    int siz = Size(F) - 1;
-    for (int i = 0; i < siz; ++i)
-        F[i] = F[i + 1] * (i + 1) % MOD;
-    return F.pop_back(), F;
+        int siz = Size(F) - 1;
+        for (int i = 0; i < siz; ++i)
+            F[i] = F[i + 1] * (i + 1) % MOD;
+        F.pop_back();
+        return F;
     }
+
     Poly inte(Poly F) {
-    F.emplace_back(0);
-    for (int i = Size(F) - 1; ~i; --i)
-        F[i] = F[i - 1] * inv(i) % MOD;
-    return F[0] = 0, F;
+        F.emplace_back(0);
+        for (int i = Size(F) - 1; i; --i)
+            F[i] = F[i - 1] * inv(i) % MOD;
+        F[0] = 0;
+        return F;
     }
+
     Poly inv(Poly F) {
-    int siz = Size(F); Poly G{inv(F[0])};
-    for (int i = 2; (i >> 1) < siz; i <<= 1) {
-        G= G + G - G * G * cut(F, i), G.resize(i);
+        int siz = Size(F);
+        Poly G{inv(F[0])};
+        for (int i = 2; (i >> 1) < siz; i <<= 1) {
+            G = G + G - G * G * cut(F, i);
+            G.resize(i);
+        }
+        G.resize(siz);
+        return G;
     }
-    return G.resize(siz), G;
-    }
+
     Poly ln(Poly F) {
-    return cut(inte(cut(der(F) * inv(F), Size(F))), Size(F));
+        return cut(inte(cut(der(F) * inv(F), Size(F))), Size(F));
     }
+
     Poly exp(Poly F) {
-    int siz = Size(F); Poly G{1};
-    for (int i = 2; (i >> 1) < siz; i <<= 1) {
-        G = G * (Poly{1} - ln(cut(G, i)) + cut(F, i)), G.resize(i);
-    }
-    return G.resize(siz), G;
+        int siz = Size(F);
+        Poly G{1};
+        for (int i = 2; (i >> 1) < siz; i <<= 1) {
+            G = G * (Poly{1} - ln(cut(G, i)) + cut(F, i));
+            G.resize(i);
+        }
+        G.resize(siz);
+        return G;
     }
 };
-using namespace poly;"\n"
+
+using namespace poly;
+"\n"
 ```
 
 ## 拉格朗日插值.cpp
@@ -5595,42 +6466,60 @@ namespace ComNum {
 ## 自动取模.cpp
 ```cpp
 #include <iostream>
+using ll = long long;
 
-template <int Mod>
-struct ModInt {
-    int v;
-    ModInt(long long _v = 0) { v = (_v % Mod + Mod) % Mod; }
-    
-    // 基础运算
-    ModInt& operator+=(const ModInt& o) { v += o.v; if (v >= Mod) v -= Mod; return *this; }
-    ModInt& operator-=(const ModInt& o) { v -= o.v; if (v < 0) v += Mod; return *this; }
-    ModInt& operator*=(const ModInt& o) { v = 1LL * v * o.v % Mod; return *this; }
-    
-    // 快速幂与逆元
-    ModInt pow(long long n) const {
-        ModInt res(1), a(*this);
-        while (n > 0) {
-            if (n & 1) res *= a;
-            a *= a; n >>= 1;
+template<int P>
+struct MODint {
+    int v, c;
+    constexpr MODint() : v(0), c(0) {}
+    constexpr MODint(ll x) : v(0), c(0) {
+        if (x != 0) {
+            while (x % P == 0) x /= P, c++;
+            v = x % P;
+            if (v < 0) v += P;
+        }
+    }
+    constexpr MODint(int v, int c) : v(v), c(c) {}
+    constexpr int val() const {
+        return c > 0 ? 0 : v;
+    }
+    constexpr int inv(int a) const {
+        int b = P - 2, res = 1;
+        for (; b; b >>= 1, a = 1LL * a * a % P) {
+            if (b & 1) res = 1LL * res * a % P;
         }
         return res;
     }
-    ModInt inv() const { return pow(Mod - 2); } // 费马小定理，要求 Mod 是质数
-    
-    ModInt& operator/=(const ModInt& o) { return *this *= o.inv(); }
-    
-    // 友元运算符
-    friend ModInt operator+(ModInt a, const ModInt& b) { return a += b; }
-    friend ModInt operator-(ModInt a, const ModInt& b) { return a -= b; }
-    friend ModInt operator*(ModInt a, const ModInt& b) { return a *= b; }
-    friend ModInt operator/(ModInt a, const ModInt& b) { return a /= b; }
-    
-    // 输入输出
-    friend std::ostream& operator<<(std::ostream& os, const ModInt& a) { return os << a.v; }
-    friend std::istream& operator>>(std::istream& is, ModInt& a) { long long v; is >> v; a = ModInt(v); return is; }
-    
-    bool operator==(const ModInt& o) const { return v == o.v; }
-    bool operator!=(const ModInt& o) const { return v != o.v; }
+    constexpr MODint& operator*=(MODint rhs) {
+        if (v == 0 || rhs.v == 0) return *this = MODint();
+        v = 1LL * v * rhs.v % P;
+        c += rhs.c;
+        return *this;
+    }
+    constexpr MODint& operator/=(MODint rhs) {
+        v = 1LL * v * inv(rhs.v) % P;
+        c -= rhs.c;
+        return *this;
+    }
+    friend constexpr MODint operator*(MODint lhs, MODint rhs) {
+        MODint res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend constexpr MODint operator/(MODint lhs, MODint rhs) {
+        MODint res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream& operator>>(std::istream& is, MODint& a) {
+        ll x;
+        is >> x;
+        a = MODint(x);
+        return is;
+    }
+    friend std::ostream& operator<<(std::ostream& os, const MODint& a) {
+        return os << a.val();
+    }
 };"\n"
 ```
 
@@ -5821,6 +6710,62 @@ ll getYuanGen(ll x) {
 
     return 0;
 }"\n"
+```
+
+## 逆元.cpp
+```cpp
+#define DEBUG 1
+#define FUCK cout << "fuck" << endl;
+#if DEBUG
+    #include "all.hpp"
+#else
+    #include <bits/stdc++.h>
+#endif
+
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using db = long double;
+using pdd = pair<db, db>;
+using i128 = __int128_t;
+
+const ll N = 2000000;
+const ll INF = 5e18;
+const ll MOD = 1e9 + 7;
+
+ll qpow(ll base,ll k,ll mod) {
+    if (base == 0) return 0;
+    ll res = 1;
+    base %= mod; base = (base + mod) % mod;
+    k %= (mod - 1); k = (k + mod - 1) % (mod - 1);
+    while (k) {
+        if (k & 1) {
+            res *= base; res %= mod;
+        }
+        k >>= 1;
+        base *= base; base %= mod;
+    }
+    return res;
+}
+
+namespace NiYuan {
+    vector<ll> fac, invFac, inv;
+
+    void init(int n) {
+        fac.resize(n + 1, 1), invFac.resize(n + 1, 1), inv.resize(n + 1, 1);
+        for (int i = 1;i<n+1;i++) {
+            fac[i] = fac[i - 1] * i % MOD;
+        }
+        invFac[n] = qpow(fac[n], MOD - 2, MOD);
+        for (int i = n - 1;i>=1;i--) {
+            invFac[i] = invFac[i + 1] * (i + 1) % MOD;
+        }
+        for (int i = 2; i <= n; i++) {
+            inv[i] = (MOD - MOD / i) * inv[MOD % i] % MOD;
+        }
+    }
+};"\n"
 ```
 
 ## 逆序数.cpp

@@ -8,62 +8,83 @@ const ll INF = 5e18;
 const ll MOD = 1e9 + 7;
 
 /*
-先插入所有模式串
-然后 init 构建 fail 数组
+Warning: 
+1. 统一使用 -1 表示无解
+2. 假定均为小写字母
+
+Usage:
+1. init()
+2. insert() 所有字符串
+3. process() 预处理
 */
+
 namespace ACAM {
     struct Node {
-        int ch[26], fail, cnt, f;
-        char c;
+        int ch[26], idx, fail, out;
         Node() {
-            fail = cnt = f = 0;
-            memset(ch, 0, sizeof ch);
+            for (int i = 0;i<26;i++) ch[i] = -1;
+            idx = fail = out = -1;
         }
-    } nodes[N]; // 注意节点数分析对
+    } nodes[N];
 
-    int cntNode; // 初始化为 0
+    int rt, cnt_node;
+
     int newNode() {
-        ++ cntNode;
-        nodes[cntNode] = Node();
-        return cntNode;
-    }
-
-    void insert(int rt, int dep, string& s) {
-        if (dep == s.size()) {
-            nodes[rt].cnt ++;
-            return;
-        }
-        if (!nodes[rt].ch[s[dep] - 'a']) {
-            nodes[rt].ch[s[dep] - 'a'] = newNode();
-            nodes[cntNode].c = s[dep];
-            nodes[cntNode].f = rt;
-        }
-        insert(nodes[rt].ch[s[dep] - 'a'], dep + 1, s);
-        return;
+        nodes[cnt_node] = Node();
+        return cnt_node ++;
     }
 
     void init() {
+        cnt_node = 0;
+        rt = newNode();
+        return;
+    }
+
+    // 这里默认使用 ACAM::rt, dep = 0
+    void insert(int rt, int dep, string& s, int idx) {
+        if (s.size() == dep) {
+            nodes[rt].idx = idx;
+            return;
+        }
+        if (nodes[rt].ch[s[dep] - 'a'] == -1) nodes[rt].ch[s[dep] - 'a'] = newNode();
+        insert(nodes[rt].ch[s[dep] - 'a'], dep + 1, s, idx);
+        return;
+    }
+
+    void process() {
         queue<int> q;
+        
         for (int i = 0;i<26;i++) {
-            if (nodes[1].ch[i]) {
-                nodes[nodes[1].ch[i]].fail = 1;
-                q.push(nodes[1].ch[i]);
+            int v = nodes[rt].ch[i];
+            if (v != -1) {
+                q.push(v);
+                nodes[v].fail = rt;
             } else {
-                nodes[1].ch[i] = 1;
+                nodes[rt].ch[i] = rt;
             }
         }
+
         while (!q.empty()) {
-            int u = q.front(); q.pop();
+            int u = q.front(); 
+            q.pop();
+
             for (int i = 0;i<26;i++) {
-                if (nodes[u].ch[i]) {
-                    nodes[nodes[u].ch[i]].fail = nodes[nodes[u].fail].ch[i];
-                    q.push(nodes[u].ch[i]);
-                } else {
+                int v = nodes[u].ch[i];
+                if (v == -1) {
                     nodes[u].ch[i] = nodes[nodes[u].fail].ch[i];
+                } else {
+                    q.push(v);
+                    nodes[v].fail = nodes[nodes[u].fail].ch[i];
+                    if (nodes[nodes[v].fail].idx != -1) {
+                        nodes[v].out = nodes[v].fail;
+                    } else {
+                        nodes[v].out = nodes[nodes[v].fail].out;
+                    }
                 }
             }
         }
+
         return;
     }
 };
-using namespace ACAM;
+

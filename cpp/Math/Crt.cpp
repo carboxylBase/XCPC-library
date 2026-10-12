@@ -58,3 +58,74 @@ int main(){
     cout<<ans.first<<" "<<ans.second<<"\n";
     return 0;
 }
+
+
+using i64 = long long;
+using i128 = __int128_t;
+
+i64 power(i64 a, i64 b, i64 p) {
+    i64 res = 1 % p;
+    for (a %= p; b; b >>= 1, a = i128(a) * a % p) {
+        if (b & 1) {
+            res = i128(res) * a % p;
+        }
+    }
+    return res;
+}
+
+i64 exgcd(i64 a, i64 b, i64 &x, i64 &y) {
+    if (!b) {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    i64 g = exgcd(b, a % b, y, x);
+    y -= i128(a / b) * x;
+    return g;
+}
+
+// a * x ≡ b (mod p)，p > 0
+// 返回最小非负解，无解返回 -1
+i64 linear(i64 a, i64 b, i64 p) {
+    a %= p;
+    b %= p;
+    if (a < 0) a += p;
+    if (b < 0) b += p;
+
+    i64 x, y;
+    i64 g = exgcd(a, p, x, y);
+    if (b % g) return -1;
+
+    p /= g;
+    x = i128(x) * (b / g) % p;
+    if (x < 0) x += p;
+    return x;
+}
+
+// a^x ≡ b (mod p)，要求 a,b >= 0，p > 1，gcd(a,p) = 1
+// 返回最小非负解，无解返回 -1
+i64 bsgs(i64 a, i64 b, i64 p) {
+    a %= p;
+    b %= p;
+    if (b == 1) return 0;
+
+    i64 s = std::sqrt((long double)p) + 1;
+    std::unordered_map<i64, i64> mp;
+    mp.reserve(2 * s);
+
+    i64 v = 1;
+    for (i64 j = 0; j < s; j++) {
+        mp.emplace(v, j); // 重复时保留最小 j
+        v = i128(v) * a % p;
+    }
+
+    i64 step = linear(v, 1, p); // a^s 的逆元
+    for (i64 i = 0; i < s; i++) {
+        auto it = mp.find(b);
+        if (it != mp.end()) {
+            return i * s + it->second;
+        }
+        b = i128(b) * step % p;
+    }
+    return -1;
+}

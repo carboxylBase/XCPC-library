@@ -49,6 +49,7 @@ namespace ComNum {
 
     ll C(ll n, ll m){
         if(m == 0) return 1;
+        if (m < 0) return 0;
         if(n >= 0){
             if(n < m) return 0;
             return fac[n] * inv[n - m] % MOD * inv[m] % MOD;
