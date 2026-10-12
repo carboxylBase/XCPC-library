@@ -99,8 +99,12 @@ void solve() {
     int M = 22;
     vector<vector<int>> fa(M, vector<int>(solver.tot + 1, 0));
     vector<int> dep(solver.tot + 1, 0);
+    vector<vector<pii>> g(solver.tot + 1);
+    vector<int> dfn(solver.tot + 1, 0);
+    int cnt_dfn = 0;
 
     auto dfs = [&](auto&& self, int u) -> void {
+        dfn[u] = ++ cnt_dfn;
         for (auto v : solver.tree[u]) {
             if (v == fa[0][u]) {
                 continue;
@@ -122,7 +126,7 @@ void solve() {
 
     vector<vector<int>> dp(M, vector<int>(solver.tot + 1, 0));
     for (int i = 1; i <= solver.tot; i++) {
-        if (fa[0][i] <= n) {
+        if (i <= n) {
             dp[0][i] = 1;
         }
     }
@@ -134,31 +138,55 @@ void solve() {
 
     int q; cin >> q;
     while (q--) {
-        int u, v; cin >> u >> v;
-        int ans = 0;
-        for (int i = M - 1; i >= 0; i--) {
-            if (dep[u] != dep[v]) {
-                if (dep[v] > dep[u]) swap(u, v);
-                if (dep[fa[i][u]] >= dep[v]) {
-                    ans += dp[i][u];
-                    u = fa[i][u];
+        int s; cin >> s;
+        vector<int> b(s);
+        for (auto &v : b) {
+            cin >> v;
+        }
+        sort(b.begin(), b.end(), [&](int x, int y) {
+            return dfn[x] < dfn[y];
+        });
+        auto lca = [&](int x, int y) -> int {
+            for (int i = M - 1;i>=0;i--) {
+                if (dep[x] > dep[y]) swap(x, y);
+                if (dep[fa[i][y]] >= dep[x]) {
+                    y = fa[i][y];
                 }
             }
-        }
-        if (u == v) {
-            ans++;
-            cout << ans << '\n';
-            continue;
-        }
-        for (int i = M - 1; i >= 0; i--) {
-            if (fa[i][u] != fa[i][v]) {
-                ans += dp[i][u] + dp[i][v];
-                u = fa[i][u], v = fa[i][v];
+            if (x == y) return x;
+            for (int i = M - 1;i>=0;i--) {
+                if (fa[i][x] != fa[i][y]) {
+                    x = fa[i][x], y = fa[i][y];
+                }
             }
+            return fa[0][x];
+        };
+        auto cal = [&](int x, int y) -> int {
+            int res = 0;
+            for (int i = M - 1;i>=0;i--) {
+                if (dep[x] > dep[y]) swap(x, y);
+                if (dep[fa[i][y]] >= dep[x]) {
+                    res += dp[i][y];
+                    y = fa[i][y];
+                }
+            }
+            if (x == y) return res;
+            for (int i = M - 1;i>=0;i--) {
+                if (fa[i][x] != fa[i][y]) {
+                    res += dp[i][x] + dp[i][y];
+                    x = fa[i][x], y = fa[i][y];
+                }
+            }
+            return res + dp[0][x] + dp[0][y];
+        };
+        int ans = 0, rt = b[0];
+        for (int i = 0;i<s;i++) {
+            ans += cal(b[i], b[(i + 1) % s]);
+            rt = lca(rt, b[i]);
         }
-        ans += 2;
-        if (fa[0][u] <= n) ans++;
-        cout << ans << '\n';
+        ans /= 2;
+        if (rt <= n) ans ++;
+        cout << ans - s << '\n';
     }
     return;
 }
@@ -173,7 +201,7 @@ signed main() {
     cin.tie(nullptr);
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
 
     while (t--) {
         solve();
