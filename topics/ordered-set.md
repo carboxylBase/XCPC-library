@@ -14,3 +14,8 @@
 - [QOJ18950 - 建设高铁](../training/2026/10/2026-10-13/QOJ18950-Railway-Construction/notes.md)
   - Kruskal 重构树将连通阈值变成集合 LCA；只需选中城市 DFS 序的最小、最大点。
   - 离线收集繁荣度/编号键，线段树维护有效数量与 DFS 序极值，按数量下降求前 k 名。用户确认 AC。
+
+## 环形滑动窗口的最大值
+
+- [CF106695L - 贪吃蛇](../training/2026/10/2026-10-13/CF106695L-Snake/notes.md)
+  - multiset 保存窗口各方向的最远距离平方；rbegin() 取最大值，erase(find(value)) 只删除一个重复值。
