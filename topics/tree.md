@@ -27,7 +27,7 @@
 
 - [QOJ18946 - 世界树](../training/2026/10/2026-10-12/QOJ18946-World-Tree/notes.md)
   - dis(x,u)+dis(y,u)=dis(x,y)+2dis(c,u)，c 是三条路径交汇点而非通常的三点公共 LCA，负权也成立。
-  - 后续完成 down/up/side、前三名排除分支与倍增实现；已归档修正版，AC 未确认。
+  - 后续完成 down/up/side、前三名排除分支与倍增实现；已归档修正版，用户于 2026-10-13 确认 AC。
 
 - [QOJ18950 - 建设高铁](../training/2026/10/2026-10-13/QOJ18950-Railway-Construction/notes.md)
   - Kruskal 重构树将连通阈值变成集合 LCA；只需选中城市 DFS 序的最小、最大点。
