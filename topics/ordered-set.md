@@ -10,3 +10,7 @@
 
 - [CF487E - Tourists](../training/2026/10/2026-10-12/CF487E-Tourists/notes.md)
   - 一个方点只存儿子圆点权值，begin() 为最小值；修改用 erase(find(old)) 删除一个实例，再 insert(new)，根不访问父方点集合。
+
+- [QOJ18950 - 建设高铁](../training/2026/10/2026-10-13/QOJ18950-Railway-Construction/notes.md)
+  - Kruskal 重构树将连通阈值变成集合 LCA；只需选中城市 DFS 序的最小、最大点。
+  - 离线收集繁荣度/编号键，线段树维护有效数量与 DFS 序极值，按数量下降求前 k 名。用户确认 AC。
