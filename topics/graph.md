@@ -47,3 +47,9 @@
 - [QOJ18950 - 建设高铁](../training/2026/10/2026-10-13/QOJ18950-Railway-Construction/notes.md)
   - Kruskal 重构树将连通阈值变成集合 LCA；只需选中城市 DFS 序的最小、最大点。
   - 离线收集繁荣度/编号键，线段树维护有效数量与 DFS 序极值，按数量下降求前 k 名。用户确认 AC。
+
+## 链上瓶颈与跨类配对
+
+- [QOJ18967 - 字符串的 Porder 之和](../training/2026/10/2026-10-14/QOJ18967-Porder-Sum/notes.md)
+  - SA 相邻 height 构成链，降序加边首次连通时的边权就是两点 LCP。
+  - 每块维护两类数量，合并贡献 w*(L1*R2+R1*L2)，省去枚举所有后缀对。
