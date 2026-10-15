@@ -18,3 +18,8 @@
   - 逐层贡献转等长反串片段配对；去掉位置顺序后用 (C+P)/2 校正，P 是回文出现次数。
   - 原串与反串混合建 SA；height 链的路径最小值表达任意两后缀 LCP，降序并查集求跨串配对和。
   - Kasai 线性求 height，Manacher 按中心累加回文个数；倍增加 sort 当前为 O(n log^2 n)。
+
+## 隐式 Trie 与字典序遍历
+
+- [QOJ15323 - Yet another mailbox problem](../training/2026/10/2026-10-15/QOJ15323-Yet-Another-Mailbox-Problem/notes.md)
+  - 先输出完整前缀，再按下一权值升序处理扩展；达到 k 条即停止，图上的路径不必显式存储字符串。

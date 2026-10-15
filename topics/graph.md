@@ -53,3 +53,8 @@
 - [QOJ18967 - 字符串的 Porder 之和](../training/2026/10/2026-10-14/QOJ18967-Porder-Sum/notes.md)
   - SA 相邻 height 构成链，降序加边首次连通时的边权就是两点 LCP。
   - 每块维护两类数量，合并贡献 w*(L1*R2+R1*L2)，省去枚举所有后缀对。
+
+## 按权值序列枚举路径
+
+- [QOJ15323 - Yet another mailbox problem](../training/2026/10/2026-10-15/QOJ15323-Yet-Another-Mailbox-Problem/notes.md)
+  - 相同前缀分组 DFS，堆归并终点出边；保留重边和相同终点的路径副本，输出边数而非边权和。
