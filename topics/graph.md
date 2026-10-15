@@ -58,3 +58,8 @@
 
 - [QOJ15323 - Yet another mailbox problem](../training/2026/10/2026-10-15/QOJ15323-Yet-Another-Mailbox-Problem/notes.md)
   - 相同前缀分组 DFS，堆归并终点出边；保留重边和相同终点的路径副本，输出边数而非边权和。
+
+## 生成树清零与奇环
+
+- [QOJ15315 - Hamu](../training/2026/10/2026-10-15/QOJ15315-Hamu/notes.md)
+  - 闭合游走每步翻转到达点；二分图闭合游走不改变总奇偶，随机换生成树不能消掉根残值。不可达奇数点必须判无解。
