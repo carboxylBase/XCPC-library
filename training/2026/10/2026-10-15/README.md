@@ -8,5 +8,6 @@
 | [G / QOJ15320 Gemcrate](QOJ15320-Gemcrate/notes.md) | 线性基、掩码投影、按位贪心 | 用户实现，助手协助定位两处 WA，用户确认 AC | 包含掩码判定、投影重建基、64 位临时变量 |
 | [H / QOJ15321 AGI](QOJ15321-AGI/notes.md) | 博弈、配对策略、异或 | 用户提供通过代码，用户确认 AC | 奇数频次分类及一般配对策略证明 |
 | [J / QOJ15323 Yet another mailbox problem](QOJ15323-Yet-Another-Mailbox-Problem/notes.md) | 隐式 Trie、字典序、堆归并 | 用户实现，助手定位边权和与边数混淆，用户确认 AC | 同前缀分组、重边计数、排序与输出含义 |
+| [CF2276F Permutation Coloring Game](CF2276F-Permutation-Coloring-Game/notes.md) | 置换环、博弈、背包、取石子 | 用户提出环模型并实现，助手协助纠错，用户确认 AC | 普通环威胁判定、k+1 环先手权、首回合非空 |
 
-六题 AC 均来自用户确认，提交链接与用时未记录。实现均已归档，不加入代码待补清单。A 的取整版本与精确半数证明分开记录；D 按最后贴出的代码补入对话已明确的终止 return。
+七题 AC 均来自用户确认，提交链接与用时未记录。实现均已归档，不加入代码待补清单。A 的取整版本与精确半数证明分开记录；D 按最后贴出的代码补入对话已明确的终止 return。

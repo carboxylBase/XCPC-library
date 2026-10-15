@@ -1,5 +1,10 @@
 # 图论
 
+## 置换环与同色交换
+
+- [CF2276F - Permutation Coloring Game](../training/2026/10/2026-10-15/CF2276F-Permutation-Coloring-Game/notes.md)
+  - i -> p[i] 分解置换环；能用同色交换排序当且仅当每个环单色，再按环大小划分博弈。
+
 ## 欧拉回路与边二染色
 
 - [QOJ18966 - 小礼品](../training/2026/10/2026-10-07/QOJ18966-Small-Gifts/notes.md)

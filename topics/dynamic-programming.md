@@ -1,5 +1,11 @@
 # 动态规划
 
+## 首回合选环与滚动背包
+
+- [CF2276F - Permutation Coloring Game](../training/2026/10/2026-10-15/CF2276F-Permutation-Coloring-Game/notes.md)
+  - 降序枚举环，选环数 j、点数 x，i-j 判断是否仍需累计前 k 个未选环的威胁。
+  - 选与不选转移独立；最小值初态用 INF，最终排除空回合，保留用户全量环遍历实现。
+
 ## 单回合资源状态与可行性
 
 - [QOJ18963 - 尖塔最强机器人](../training/2026/10/2026-10-07/QOJ18963-Strongest-Robot/notes.md)
