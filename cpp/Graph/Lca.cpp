@@ -70,17 +70,20 @@ struct Lca {
 };
 
 // dep 跟 dist 不要搞混了谢谢喵
-struct Lca {
+struct LcaBinary {
 	int M = 20;
 	vector<vector<int>> fa;
 	vector<int> dep;
 	void init(vector<vector<int>>& g, int rt) {
 		int n = g.size() - 1;
+        M = 1;
+        while ((1LL << M) <= n) ++M;
 		fa.clear();
 		fa.resize(n + 1, vector<int>(M, 0));
 		dep.clear();
 		dep.resize(n + 1, 0);
 		dep[0] = 0;
+        dep[rt] = 1;
 		auto dfs = [&](auto&&self, int u, int f) -> void {
 			for (auto v : g[u]) {
 				if (v == f) continue;
@@ -118,4 +121,4 @@ struct Lca {
 		int z = lca(x, y);
 		return dep[x] + dep[y] - 2 * dep[z];
 	}
-} solver;
+} solverLcaBinary;

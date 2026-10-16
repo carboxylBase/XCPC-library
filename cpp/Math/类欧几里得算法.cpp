@@ -24,7 +24,6 @@ i128 floor_sum_i128(i128 n, i128 m, i128 a, i128 b){
 
 i128 floor_sum_mod(i128 n, i128 m, i128 a, i128 b, i128 mod){
     if(n<=0) return 0;
-    a%=m; b%=m;
     i128 ans=0;
     if(a<0){ b += a*(n-1); a = -a; }
     if(b<0){ i128 k = (-b + m - 1) / m; b += k*m; ans -= k*n; }

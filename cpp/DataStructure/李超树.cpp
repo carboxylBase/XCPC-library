@@ -24,13 +24,13 @@ struct LiChaoTree {
         double k, b;
     } p[100005];
 
-    int s[160005];
+    vector<int> s;
     int cnt;
 
     void init(int x) {
         cnt = 0;
         p[0].k = 0; p[0].b = NINF;                  
-        fill(s, s + x * 4 + 10, 0);
+        s.assign(x * 4 + 10, 0);
     }
 
 
@@ -74,7 +74,7 @@ struct LiChaoTree {
     }
 
     pdi query(int root, int l, int r, int d) {  // 查询
-        if (r < d || d < l) return {0, 0};
+        if (r < d || d < l) return {NINF, 0};
         int mid = (l + r) >> 1;
         double res = calc(s[root], d);
         if (l == r) return {res, s[root]};
@@ -139,13 +139,13 @@ long double 比 double 慢得多, 慎用!!!
 using db = double;
 const db INF_LD = numeric_limits<db>::infinity();
 
-struct LiChao {
+struct LiChaoFloat {
     struct Line { db m, b; };
     struct Node { Line ln; Node *l, *r; Node(Line v):ln(v),l(nullptr),r(nullptr){} };
     db L, R;
     Node *root;
     int maxDepth;
-    LiChao(db _L = 0, db _R = 0, int _maxDepth = 50):L(_L),R(_R),root(nullptr),maxDepth(_maxDepth){}
+    LiChaoFloat(db _L = 0, db _R = 0, int _maxDepth = 50):L(_L),R(_R),root(nullptr),maxDepth(_maxDepth){}
     inline db eval(const Line &ln, db x) const { return ln.m * x + ln.b; }
     void addLine(Line nw, Node *&nd, db l, db r, int depth) {
         if (!nd) { nd = new Node(nw); return; }

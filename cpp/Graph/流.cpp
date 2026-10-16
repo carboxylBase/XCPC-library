@@ -132,7 +132,9 @@ public:
  
     void init(int n) {
         this->n = n;
-        fill(head.begin(), head.end(), 0);
+        head.assign(n + 1, 0);
+        dis.resize(n + 1); flow.resize(n + 1);
+        pre.resize(n + 1); last.resize(n + 1); vis.resize(n + 1);
         cnt = 1;
     }
  
@@ -144,7 +146,7 @@ public:
     }
  
     bool spfa(int s, int t) {
-        const int INF = 0x3f3f3f3f;
+        const T INF = numeric_limits<T>::max() / 4; // 路径费用须在此范围内
         fill(dis.begin(), dis.end(), INF);
         fill(flow.begin(), flow.end(), INF);
         fill(vis.begin(), vis.end(), false);
@@ -180,7 +182,7 @@ public:
     pair<T, T> run(int s, int t) {
         T maxFlow = 0, minCost = 0;
         while (spfa(s, t)) {
-            int f = flow[t];
+            T f = flow[t];
             maxFlow += f;
             minCost += f * dis[t];
             for (int u = t; u != s; u = pre[u]) {

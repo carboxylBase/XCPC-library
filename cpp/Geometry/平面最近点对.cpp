@@ -7,7 +7,9 @@ template<typename T>
 auto closest_pair_sq(vector<pair<T,T>>& a){
     using R = conditional_t<is_integral_v<T>, long long, db>;
     if(a.size()<2) return R(0);
-    sort(a.begin(), a.end(), [](auto&p,auto&q){ return p.first<q.first; });
+    sort(a.begin(), a.end(), [](auto&p,auto&q){ return p<q; });
+    for (size_t i = 1; i < a.size(); ++i)
+        if (a[i] == a[i - 1]) return R(0);
     vector<pair<T,T>> buf(a.size());
 
     function<R(int,int)> rec = [&](int l,int r)->R{
@@ -29,9 +31,9 @@ auto closest_pair_sq(vector<pair<T,T>>& a){
             }
             for(int i=0;i<(int)v.size();++i)
                 for(int j=i+1;j<(int)v.size() &&
-                    (i128)(v[j].second-v[i].second)*(v[j].second-v[i].second) <= D; ++j){
-                    i128 dx = (i128)(v[j].first - v[i].first);
-                    i128 dy = (i128)(v[j].second - v[i].second);
+                    ((i128)v[j].second-v[i].second)*((i128)v[j].second-v[i].second) <= D; ++j){
+                    i128 dx = ((i128)v[j].first - v[i].first);
+                    i128 dy = ((i128)v[j].second - v[i].second);
                     i128 w = dx*dx + dy*dy;
                     if(w < D) D = w;
                 }

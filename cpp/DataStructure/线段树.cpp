@@ -1,3 +1,4 @@
+// 【框架】Info/Node、合并、标记及业务查询需按题填写；空接口不是可直接使用的实现。
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
@@ -153,7 +154,7 @@ struct DynamicSegTree {
 };
 
 
-struct DynamicSegTree {
+struct DynamicSegTreePoint {
 	#define LS info[rt].ls
 	#define RS info[rt].rs
 	struct Info {
@@ -162,7 +163,7 @@ struct DynamicSegTree {
             ls = rs = 0;
         }
         Info operator+(const Info& A) const {
-
+            throw logic_error("TODO: segment tree Info merge");
         }
     } info[N];
 	int cntNode = 0;
@@ -246,14 +247,14 @@ struct DynamicSegTree {
 			return query(LS,l,mid,ql,qr) + query(RS,mid+1,r,ql,qr);
 		}
 	}
-} solver;
+} solverDynamicSegTreePoint;
 
 
 /*
 线段树合并以及线段树分裂的整合代码
 细节还是比较多的, 比如说, 注意这个 split 之后的 pushUp
 */
-namespace SegTree {
+namespace SegTreeMergeSplit {
     struct Node {
         int ch[2];
         ll cnt, sum;
@@ -359,4 +360,4 @@ namespace SegTree {
         return;
     }
 };
-using namespace SegTree;
+using namespace SegTreeMergeSplit;

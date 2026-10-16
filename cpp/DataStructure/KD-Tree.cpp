@@ -128,7 +128,7 @@ struct KD_Tree {
 
 // 这种写法， 就很优美!!
 const int M = 2;
-struct KD_Tree {
+struct KD_TreeDistance {
     struct Node {
         ll x[M], mn[M], mx[M], ch[M], val, sum;
 
@@ -271,4 +271,4 @@ struct KD_Tree {
             treeSize[i] = 0;
         }
     }
-} solver;
+} solverKD_TreeDistance;

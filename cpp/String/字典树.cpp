@@ -8,7 +8,7 @@ const ll N = 2000000;
 const ll INF = 5e18;
 const ll MOD = 1e9 + 7;
 
-namespace Trie {
+namespace TrieBits {
     const int M = 31;
     struct Node {
         int ch[2];
@@ -40,14 +40,14 @@ namespace Trie {
         return;
     }
 };
-using namespace Trie;
+// 数组版本使用 TrieBits；下方 Trie 为 vector 版本。
 
 struct Trie {
     int cnt;
     struct Node {
         int ch[2];
         Node () {
-            ch[0] = ch[1] = 0;
+            ch[0] = ch[1] = -1;
         }
     };
     vector<Node> nodes;

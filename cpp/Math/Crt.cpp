@@ -73,17 +73,6 @@ i64 power(i64 a, i64 b, i64 p) {
     return res;
 }
 
-i64 exgcd(i64 a, i64 b, i64 &x, i64 &y) {
-    if (!b) {
-        x = 1;
-        y = 0;
-        return a;
-    }
-    i64 g = exgcd(b, a % b, y, x);
-    y -= i128(a / b) * x;
-    return g;
-}
-
 // a * x ≡ b (mod p)，p > 0
 // 返回最小非负解，无解返回 -1
 i64 linear(i64 a, i64 b, i64 p) {

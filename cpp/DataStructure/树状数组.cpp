@@ -1,3 +1,4 @@
+// 【框架】Info/Node、合并、标记及业务查询需按题填写；空接口不是可直接使用的实现。
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
@@ -14,10 +15,10 @@ struct BIT {
             
         }
         Info operator+(const Info& A) const {
-
+            throw logic_error("TODO: BIT Info merge");
         }
         Info operator-(const Info& A) const {
-
+            throw logic_error("TODO: BIT Info subtract");
         } 
     };
     vector<Info> infos;
@@ -27,6 +28,7 @@ struct BIT {
     }
     int lowbit(int x) {return x & -x;}
     void update(int x, ll v) {
+        throw logic_error("TODO: BIT update");
         x ++;
         while (x <= n) {
 

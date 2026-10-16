@@ -24,12 +24,13 @@ public:
     }
 
     void buildMinHeap(vector<T>& a) {
+        init((int)a.size() - 1);
         vector<int> stk;
         stk.push_back(0);
-        nodes[0].val = -INF;
+        // a 为 1 下标数组；0 仅作栈哨兵，不比较 a[0]。
         for (int i = 1;i<a.size();i++) {
             int lst = -1;
-            while (a[stk.back()] > a[i]) {
+            while (stk.size() > 1 && a[stk.back()] > a[i]) {
                 lst = stk.back();
                 stk.pop_back();
             }

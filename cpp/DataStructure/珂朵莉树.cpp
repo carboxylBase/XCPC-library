@@ -43,7 +43,7 @@ struct ChthollyTree {
     }
 };
 
-struct ChthollyTree {
+struct IntervalSet {
     const int M = 1e8;
     struct Node {
         int l,r;

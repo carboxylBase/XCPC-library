@@ -121,6 +121,7 @@ struct Splay{
             nodes[p].fa = fp;
         }else{
             nodes[p].cnt++;
+            update(p);
         }
         splay(p,0);
     }
@@ -203,7 +204,7 @@ void solve(){
 }
 
 signed main(){
-    freopen("input.txt","r",stdin);
+    // 如需本地文件输入，请自行开启 freopen。
     ios::sync_with_stdio(0),cin.tie(0),cout.tie(0);
     int _ = 1;
     // cin >> _;

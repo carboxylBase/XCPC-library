@@ -1,3 +1,4 @@
+// 【框架】Info/Node、合并、标记及业务查询需按题填写；空接口不是可直接使用的实现。
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
@@ -109,8 +110,8 @@ struct TreeChainSeg {
     }
 
     void dfs2(int u, int tp) {
-        dfn[u] = ++cnt;
         id[cnt] = u;
+        dfn[u] = cnt ++;
         top[u] = tp;
         if (son[u]) {
             dfs2(son[u], tp);
@@ -125,7 +126,7 @@ struct TreeChainSeg {
     void init(vector<vector<int>>& G) {
         g = G;
         n = (int)g.size() - 1;
-        cnt = 0, cnt2 = n + 1;
+        cnt = 1, cnt2 = n + 1;
         fa.clear(); fa.resize(n + 1, 0);
         top.clear(); top.resize(n + 1, 0);
         siz.clear(); siz.resize(n + 1, 0);

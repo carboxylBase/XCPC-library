@@ -25,7 +25,7 @@ public:
     }
 
     void pushUp(int x){
-        nodes[x].dist = nodes[ls(x)].dist + 1;
+        nodes[x].dist = nodes[rs(x)].dist + 1;
         nodes[ls(x)].fa = nodes[rs(x)].fa = x;
     }
 

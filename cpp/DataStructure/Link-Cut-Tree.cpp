@@ -1,3 +1,4 @@
+// 【框架】Info/Node、合并、标记及业务查询需按题填写；空接口不是可直接使用的实现。
 #define DEBUG 1
 #define FUCK cout << "fuck" << endl;
 #if DEBUG
@@ -174,6 +175,7 @@ struct LCT {
     int query(int x, int y) {
         split(x, y);
         // return sum[y];
+        throw logic_error("TODO: LCT query aggregate");
     }
 } solver;
 
@@ -181,7 +183,7 @@ struct LCT {
 维护子树信息特供版
 
 */
-struct LCT {
+struct LCTSubtree {
     int n;
     int f[N], st[N];
     array<int, 2> c[N];
@@ -322,12 +324,12 @@ struct LCT {
             pushup(x);
         }
     }
-} solver;
+} solverLCTSubtree;
 
 /*
-这个 LCT 实现区间加乘
+这个 LCTSubtree 实现区间加乘
 */
-struct LCT {
+struct LCTAffine {
     int n;
     int f[N], val[N], st[N];
     array<int, 2> c[N];
@@ -520,4 +522,4 @@ struct LCT {
         split(x, y);
         return sum[y];
     }
-} solver;
+} solverLCTAffine;

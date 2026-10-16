@@ -1,61 +1,45 @@
 #include <bits/stdc++.h>
 using namespace std;
-typedef long long ll;
+using ll = long long;
 
-template <typename T>
-struct Mat
-{
+// 默认模数可通过第二个模板参数修改：Mat<ll, 998244353>。
+// 元素使用整数类型，保持在 [0, Mod)；Mod > 0。
+template<typename T, ll Mod = 1000000007>
+struct Mat {
+    static_assert(Mod > 0);
     int n, m;
-    T **a;
-    Mat(int _n = 0, int _m = 0) : n(_n), m(_m)
-    {
-        a = new T *[n];
-        for (int i = 0; i < n; i++)
-            a[i] = new T[m], memset(a[i], 0, sizeof(T) * m);
+    vector<vector<T>> a;
+    Mat(int n = 0, int m = 0) : n(n), m(m), a(n, vector<T>(m, 0)) {}
+    static Mat identity(int n) {
+        Mat ret(n, n);
+        for (int i = 0; i < n; ++i) ret.a[i][i] = 1 % Mod;
+        return ret;
     }
-    Mat(const Mat &B)
-    {
-        n = B.n, m = B.m;
-        a = new T *[n];
-        for (int i = 0; i < n; i++)
-            a[i] = new T[m], memcpy(a[i], B.a[i], sizeof(T) * m);
-    }
-    ~Mat() { delete[] a; }
-    Mat &operator=(const Mat &B)
-    {
-        delete[] a;
-        n = B.n, m = B.m;
-        a = new T *[n];
-        for (int i = 0; i < n; i++)
-            a[i] = new T[m], memcpy(a[i], B.a[i], sizeof(T) * m);
-        return *this;
-    }
-    Mat operator+(const Mat &B) const
-    { 
-        assert(n == B.n && m == B.m);
+    Mat operator+(const Mat& b) const {
+        assert(n == b.n && m == b.m);
         Mat ret(n, m);
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < m; j++)
-                ret.a[i][j] = (a[i][j] + B.a[i][j]) % mod;
-        return ret;
-    }
-    Mat &operator+=(const Mat &B) { return *this = *this + B; }
-    Mat operator*(const Mat &B) const
-    {
-        Mat ret(n, B.m);
         for (int i = 0; i < n; ++i)
-            for (int j = 0; j < B.m; ret.a[i][j++] %= mod)
-                for (int k = 0; k < m; ++k)
-                    ret.a[i][j] += a[i][k] * B.a[k][j] % mod;
+            for (int j = 0; j < m; ++j)
+                ret.a[i][j] = ((__int128)a[i][j] + b.a[i][j]) % Mod;
         return ret;
     }
-    Mat &operator*=(const Mat &B) { return *this = *this * B; }
+    Mat operator*(const Mat& b) const {
+        assert(m == b.n);
+        Mat ret(n, b.m);
+        for (int i = 0; i < n; ++i)
+            for (int k = 0; k < m; ++k)
+                for (int j = 0; j < b.m; ++j)
+                    ret.a[i][j] = (ret.a[i][j] + (__int128)a[i][k] * b.a[k][j]) % Mod;
+        return ret;
+    }
+    Mat& operator+=(const Mat& b) { return *this = *this + b; }
+    Mat& operator*=(const Mat& b) { return *this = *this * b; }
 };
-Mat<ll> qpow(Mat<ll> A, ll b)
-{
-    Mat<ll> ret(A);
-    for (--b; b; b >>= 1, A *= A)
-        if (b & 1)
-            ret *= A;
+template<typename T, ll Mod>
+Mat<T, Mod> qpow(Mat<T, Mod> a, ll b) {
+    assert(a.n == a.m && b >= 0);
+    auto ret = Mat<T, Mod>::identity(a.n);
+    for (; b; b >>= 1, a *= a)
+        if (b & 1) ret *= a;
     return ret;
 }

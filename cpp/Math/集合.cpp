@@ -173,7 +173,13 @@ signed main() {
 
 // 这里还有一个十进制版本的 sosdp
 
+// 数组长度必须为 10 的非负整数次幂。
 void zeta(vector<int>& c, vector<int>& s, vector<int>& q) {
+    const int V = c.size();
+    assert(s.size() == c.size() && q.size() == c.size());
+    int length = V;
+    while (length > 1 && length % 10 == 0) length /= 10;
+    assert(length == 1);
     for (int base = 1; base < V; base *= 10) {
         int step = base * 10;
         for (int l = 0; l < V; l += step) {
@@ -194,6 +200,10 @@ void zeta(vector<int>& c, vector<int>& s, vector<int>& q) {
 }
 
 void mobius(vector<int>& f) {
+    const int V = f.size();
+    int length = V;
+    while (length > 1 && length % 10 == 0) length /= 10;
+    assert(length == 1);
     for (int base = 1; base < V; base *= 10) {
         int step = base * 10;
         for (int l = 0; l < V; l += step) {

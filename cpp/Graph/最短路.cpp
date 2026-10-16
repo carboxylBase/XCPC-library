@@ -6,6 +6,7 @@ const ll N = 2000000;
 const ll MOD = 998244353;
 const ll MAX = 1e18;
 
+// 【未完成框架】请使用下方 Dijkstra / Johnson；此类需自行补充。
 struct ShortestPath {
     int n;
     vector<vector<int>>& g;
@@ -13,7 +14,7 @@ struct ShortestPath {
         ll val;
         int idx;
         bool operator<(const Node& A) const {
-
+            return val > A.val;
         };
     };
     priority_queue<Node> nodes;
@@ -52,8 +53,8 @@ public:
 		n = N; m = M;
 		head.clear();
         head.resize(n+1,0);
-        Edge.clear();
-        Edge.resize(M + 1);
+        edge.clear();
+        edge.resize(M + 1);
 		cnt = 0;
 		return;
 	}
@@ -64,11 +65,11 @@ class Dijkstra{
 public:
 	Graph<T>* g;
 	struct Node{
-		int dist,idx;
+		ll dist; int idx;
 		bool operator<(const Node &a) const {
 			return dist > a.dist;
 		}
-		Node(int d,int x) {dist = d,idx = x;}
+		Node(ll d,int x) {dist = d,idx = x;}
 	};
 
 	ll dist[N];
@@ -127,6 +128,7 @@ public:
     bool check() {
         int n = g->n;
         int m = g->m;
+        g->edge.resize(g->cnt + n + 1);
         g->edge[0] = typename Graph<T>::Edge(); // dummy
         for (int i = 1; i <= n; i++) {
             g->add(0, i, 0); // 从虚拟源点 0 连向每个点

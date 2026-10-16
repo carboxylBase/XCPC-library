@@ -25,6 +25,10 @@ namespace SAM {
     long long endpos_cnt[MAXLEN * 2];
 
     void sam_init() {
+        for (int i = 0; i < sz; ++i) {
+            st[i] = state{};
+            endpos_cnt[i] = 0;
+        }
         st[0].len = 0;
         st[0].link = -1;
         sz = 1; last = 0;
@@ -72,7 +76,7 @@ namespace SAM {
 }
 
 // 小写字母字符集
-namespace SAM {
+namespace SAMLowercase {
     struct state {
         int len, link;
         int next[26];
@@ -83,6 +87,10 @@ namespace SAM {
     long long endpos_cnt[MAXLEN * 2];
 
     void sam_init() {
+        for (int i = 0; i < sz; ++i) {
+            st[i] = state{};
+            endpos_cnt[i] = 0;
+        }
         st[0].len = 0;
         st[0].link = -1;
         sz = 1; last = 0;

@@ -122,12 +122,12 @@ struct FHQ_Treap {
 这个是按照值域分解的版本, 同时具有给指定值域的数加上一定值的功能
 */
 
-struct FHQ_Treap {
+struct FHQ_TreapValue {
     int ch[N][2], rnd[N], idx[N];
     int tot, rt;
     ll val[N], laz[N];
 
-    FHQ_Treap() {
+    FHQ_TreapValue() {
         tot = 0;
         rt = 0;
         memset(ch, 0, sizeof ch);
@@ -199,4 +199,4 @@ struct FHQ_Treap {
         }
         rt = unite(a, b);
     }
-} solver;
+} solverFHQ_TreapValue;

@@ -31,6 +31,10 @@ namespace PAM {
 
     // 先给 s 赋值
     void init() {
+        for (int i = 0; i <= max(tot, 1); ++i) {
+            fill(ch[i], ch[i] + 26, 0);
+            fail[i] = len[i] = sum[i] = 0;
+        }
         tot = 1;
         n = s.size();
         fail[0] = 1, len[1] = -1;

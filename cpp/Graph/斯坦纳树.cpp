@@ -25,8 +25,8 @@ public:
 		n = N; m = M;
 		head.clear();
         head.resize(n+1,0);
-        Edge.clear();
-        Edge.resize(M + 1);
+        edge.clear();
+        edge.resize(M + 1);
 		cnt = 0;
 		return;
 	}

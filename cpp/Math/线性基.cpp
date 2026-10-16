@@ -7,21 +7,22 @@ using namespace std;
 
 struct LinearBasis {
     ll basis[63];
-    bool flag0; // 是否可以表示 0
+    bool flag0; // 是否存在非空子集异或为 0；输入范围 [0, 2^61)
 
+    LinearBasis() { init(); }
     void insert(ll x) {
-        if (!x) return;
+        if (!x) { flag0 = true; return; }
         for (int i = 60;i>=0;i--) {
             if ((1ll<<i)&x) {
                 if (basis[i]) {
                     x ^= basis[i];
                 } else {
                     basis[i] = x;
-                    break;
+                    return;
                 }
             }
         }
-        if (x) flag0 = 1;
+        if (!x) flag0 = true;
         return;
     }
 
@@ -43,12 +44,15 @@ struct LinearBasis {
         return;
     }
 
+    // 最小非空子集异或和；没有插入任何数时返回 -1。
     ll get_mn() {
+        if (flag0) return 0;
         for (int i = 0;i<=60;i++) {
             if (basis[i]) {
                 return basis[i];
             }
         }
+        return -1;
     }
 
     ll get_mx() {
