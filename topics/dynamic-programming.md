@@ -38,3 +38,8 @@
 
 - [QOJ15317 - Not a subset sum](../training/2026/10/2026-10-15/QOJ15317-Not-a-Subset-Sum/notes.md)
   - 状态定义不变，优化枚举域；每块数量要乘块数，省去复制不等于消掉 n 因子。
+
+## 区间修改与带权异或转移
+
+- [QOJ15322 - Round screws](../training/2026/10/2026-10-16/QOJ15322-Round-Screws/notes.md)
+  - 固定保留端点，整段修改连接代价为两端异或；两侧补零统一端点，转移拆成位置项与历史带权异或查询。
