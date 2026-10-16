@@ -1,5 +1,11 @@
 # 博弈
 
+## 置换环与先手权
+
+- [CF2276F - Permutation Coloring Game](../training/2026/10/2026-10-15/CF2276F-Permutation-Coloring-Game/notes.md)
+  - 普通环用最大 k 项 size-1 衡量同时打开的威胁；k+1 环必须单独处理主动选择压力。
+  - 首回合清空非单点小环，单点归约取石子；能补完威胁并不自动保证全局必胜。
+
 ## 先手时序与永久障碍
 
 - [QOJ18962 - 星战](../training/2026/10/2026-10-07/QOJ18962-Star-Wars/notes.md)
