@@ -1,5 +1,11 @@
 # 构造
 
+## 局部五点与奇偶配对
+
+- [ICPC 2026 Chengdu E - Enclose the Point](../training/2026/10/2026-10-28/ICPC2026ChengduE-Enclose-the-Point/notes.md)
+  - 严格含查询点的凸四边形加入任意第五个凸包顶点，必存在合法三角形；若不存在，则五点必须沿过查询点的直线两两配对，奇偶矛盾。
+  - 从扇形二分定位结果确定性地选出局部候选，代替随机更换剖分起点；仅凸包恰为四边形时才需额外原点见证。
+
 ## 用值域界限维护有序切口
 
 - [Hidden Order](../training/2026/10/2026-10-27/Unknown-Hidden-Order/notes.md)
