@@ -73,8 +73,8 @@ vector<Point<T>> getConvexHull(vector<Point<T>>& p) {
 
     for (int i = 0; i < n; i++) {
         while (hull.size() > 1 &&
-               check((hull.back() - hull[hull.size() - 2]) ^
-                     (p[i] - hull.back()))) {
+                check((hull.back() - hull[hull.size() - 2]) ^
+                    (p[i] - hull.back()))) {
             hull.pop_back();
         }
         hull.push_back(p[i]);
@@ -83,8 +83,8 @@ vector<Point<T>> getConvexHull(vector<Point<T>>& p) {
     int k = hull.size();
     for (int i = n - 2; i >= 0; i--) {
         while ((int)hull.size() > k &&
-               check((hull.back() - hull[hull.size() - 2]) ^
-                     (p[i] - hull.back()))) {
+                check((hull.back() - hull[hull.size() - 2]) ^
+                    (p[i] - hull.back()))) {
             hull.pop_back();
         }
         hull.push_back(p[i]);
@@ -93,6 +93,35 @@ vector<Point<T>> getConvexHull(vector<Point<T>>& p) {
     hull.pop_back();
     return hull;
 }
+
+// 单次 log 的复杂度
+template<class T>
+bool inConvexStrict(const vector<Point<T>>& hull, const Point<T>& p) {
+    int n = hull.size();
+    if (n < 3) return false;
+
+    auto cross = [](const Point<T>& a,
+                    const Point<T>& b,
+                    const Point<T>& c) -> T {
+        return (b - a) ^ (c - a);
+    };
+
+    if (cross(hull[0], hull[1], p) <= 0) return false;
+    if (cross(hull[0], hull[n - 1], p) >= 0) return false;
+
+    int lo = 1, hi = n - 1;
+    while (hi - lo > 1) {
+        int mid = (lo + hi) / 2;
+        if (cross(hull[0], hull[mid], p) >= 0) {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+
+    return cross(hull[lo], hull[hi], p) > 0;
+}
+
 
 template<class T>
 vector<Point<T>> minkowski(vector<Point<T>> a, vector<Point<T>> b) {
