@@ -1,5 +1,11 @@
 # 构造
 
+## 严格不等式的有理方向与整数放大
+
+- [QOJ14802 - What, More Kangaroos?](../training/2026/10/2026-10-30/QOJ14802-What-More-Kangaroos/notes.md)
+  - 一组选中向量存在严格负点积实数方向时，由开放余量可微调为有理方向，通分成整数向量后继续放大，压过所有正初值。
+  - 最大可行集合等价于某个过原点开半平面内的非零参数向量，最终通过极角窗口求最大重数。
+
 ## 局部五点与奇偶配对
 
 - [ICPC 2026 Chengdu E - Enclose the Point](../training/2026/10/2026-10-28/ICPC2026ChengduE-Enclose-the-Point/notes.md)

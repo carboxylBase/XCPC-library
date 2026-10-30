@@ -1,5 +1,12 @@
 # 动态规划
 
+## 完全图游走与总方案补集
+
+- [CF166E - Tetrahedron](../training/2026/10/2026-10-30/CF166E-Tetrahedron/notes.md)
+  - 从 D 出发的 i 步总方案为 3^i；末点非 D 的每种方案恰能追加一步回 D，故 f(0)=1，f(i+1)=3^i-f(i)。
+  - 用户独立提出递推；闭式 (3^n+3(-1)^n)/4 由助手补充，模意义下除以 4 使用逆元。
+  - 仅完成口头推导，未记录代码、提交或 AC，不作为几何核心题计数。
+
 ## 首回合选环与滚动背包
 
 - [CF2276F - Permutation Coloring Game](../training/2026/10/2026-10-15/CF2276F-Permutation-Coloring-Game/notes.md)
