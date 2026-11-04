@@ -19,7 +19,19 @@ const ll INF = 5e18;
 const ll MOD = 1e9 + 7;
 
 void solve() {
-    
+    int n, m; cin >> n >> m;
+    string s, t; cin >> s >> t;
+
+    auto cal = [&](string s, string t) -> void {
+        n = s.size(), m = t.size();
+        for (int i = 0;i<n;i++) {
+            if (s[i] == 'R') {
+                
+            }
+        }
+    };
+
+    cal(s, t), cal(t, s);
     return;
 }
 
@@ -48,3 +60,4 @@ signed main() {
 
     return 0;
 }
+

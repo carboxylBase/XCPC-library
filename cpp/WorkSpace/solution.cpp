@@ -19,31 +19,28 @@ const ll INF = 5e18;
 const ll MOD = 1e9 + 7;
 
 void solve() {
-	ll n, m, k; cin >> n >> m >> k;
-	vector<ll> a(n);
-	for (auto &v : a) cin >> v;
-	while (m --) {
-		char opt; cin >> opt;
-		if (opt != 'A') {
-			ll t; cin >> t;
-			while (t --) {
-				ll mx = -INF;
-				for (auto v : a) mx = max(v, mx);
-				for (auto &v : a) {
-					if (v == mx) {
-						v -= k;
-						break;
-					}
-				}
+	int n; cin >> n;
+	string s[2]; cin >> s[0] >> s[1];
+	int ans = 0;
+	for (int i = 0;i<n;i++) {
+		if (s[0][i] == s[1][i]) {
+			s[0][i] = s[1][i] = 'o';
+		} else if (s[0][i] == 'f') {
+			if (i + 1 < n && s[0][i + 1] == 'f') {
+				s[0][i + 1] = 'o';
+			} else {
+				ans ++;
 			}
-
-			for (auto v : a) {
-				cout << v << ' ';
-			}
-			cout << endl;
 		} else {
+			if (i + 1 < n && s[1][i + 1] == 'f') {
+				s[1][i + 1] = 'o';
+			} else {
+				ans ++;
+			}
 		}
 	}
+
+	cout << ans << endl;
 	return;
 }
 
@@ -57,7 +54,7 @@ signed main() {
 	cin.tie(nullptr);
 
 	int t = 1;
-	// cin >> t;
+	cin >> t;
 
 	while (t--) {
 		solve();
