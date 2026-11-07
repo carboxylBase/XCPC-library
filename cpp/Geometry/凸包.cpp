@@ -158,3 +158,31 @@ vector<Point<T>> minkowski(vector<Point<T>> a, vector<Point<T>> b) {
     ans.pop_back();
     return ans;
 }
+
+// 单次 log 的复杂度
+template<class T>
+bool inConvexStrict(const vector<Point<T>>& hull, const Point<T>& p) {
+    int n = hull.size();
+    if (n < 3) return false;
+
+    auto cross = [](const Point<T>& a,
+                    const Point<T>& b,
+                    const Point<T>& c) -> T {
+        return (b - a) ^ (c - a);
+    };
+
+    if (cross(hull[0], hull[1], p) <= 0) return false;
+    if (cross(hull[0], hull[n - 1], p) >= 0) return false;
+
+    int lo = 1, hi = n - 1;
+    while (hi - lo > 1) {
+        int mid = (lo + hi) / 2;
+        if (cross(hull[0], hull[mid], p) >= 0) {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+
+    return cross(hull[lo], hull[hi], p) > 0;
+}

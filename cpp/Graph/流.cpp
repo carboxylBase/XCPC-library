@@ -297,3 +297,111 @@ namespace MCMF{
         return mcmf(s0, t0);
     }
 }
+
+// 这个是那种阶梯式的， 就是， 第一次走费用是 0， 第二次 c， 2c， 3c 。。 这样的
+template<typename T>
+class MinCostMaxFlow {
+public:
+    struct Edge {
+        int next, to;
+        T w, c;
+    };
+ 
+    int n,cnt;                             
+    vector<Edge> edge;                   
+    vector<T> dis,flow;           
+    vector<int> pre,last,head;            
+    vector<bool> vis;          
+ 
+
+    MinCostMaxFlow(int n, int edgeCapacity = 4000000) : n(n) {
+        head.assign(n + 1, 0);
+        edge.resize(edgeCapacity + 1);
+        cnt = 1; 
+        dis.assign(n + 1, 0);
+        pre.assign(n + 1, -1);
+        last.assign(n + 1, 0);
+        flow.assign(n + 1, 0);
+        vis.assign(n + 1, false);
+    }
+ 
+    void init(int n) {
+        this->n = n;
+        head.assign(n + 1, 0);
+        dis.resize(n + 1); flow.resize(n + 1);
+        pre.resize(n + 1); last.resize(n + 1); vis.resize(n + 1);
+        cnt = 1;
+    }
+ 
+    void addEdge(int u, int v, T w,T c) {
+        edge[++cnt] = { head[u], v, w, c };
+        head[u] = cnt;
+        edge[++cnt] = { head[v], u, 0, -c };
+        head[v] = cnt;
+    }
+
+    T getCost(int id) const {
+        int base = id & ~1;       // 对应的正向边
+        T used = edge[base ^ 1].w; // 当前流量 = 反向剩余容量
+        T delta = edge[base].c;
+
+        if (id & 1) {
+            // 撤销最后一单位
+            return -(used - 1) * delta;
+        } else {
+            // 增加下一单位
+            return used * delta;
+        }
+    }
+    
+    bool spfa(int s, int t) {
+        const T INF = numeric_limits<T>::max() / 4; // 路径费用须在此范围内
+        fill(dis.begin(), dis.end(), INF);
+        fill(flow.begin(), flow.end(), INF);
+        fill(vis.begin(), vis.end(), false);
+        fill(pre.begin(), pre.end(), -1);
+ 
+        queue<int> q;
+        q.push(s);
+        vis[s] = true;
+        dis[s] = 0;
+        flow[s] = INF;
+ 
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            vis[u] = false;
+            for (int i = head[u]; i; i = edge[i].next) {
+                int v = edge[i].to;
+                T cost = getCost(i);
+                if (edge[i].w > 0 && dis[v] > dis[u] + cost) {
+                    dis[v] = dis[u] + cost;
+                    pre[v] = u;
+                    last[v] = i;
+                    flow[v] = min(flow[u], edge[i].w);
+                    if (!vis[v]) {
+                        q.push(v);
+                        vis[v] = true;
+                    }
+                }
+            }
+        }
+        return pre[t] != -1;
+    }
+ 
+    pair<T, T> run(int s, int t) {
+        T maxFlow = 0, minCost = 0;
+        while (spfa(s, t)) {
+            T f = flow[t];
+            f = 1;
+            maxFlow += f;
+            minCost += f * dis[t];
+            for (int u = t; u != s; u = pre[u]) {
+                int i = last[u];
+                edge[i].w -= f;
+                edge[i ^ 1].w += f;
+            }
+        }
+        return { maxFlow, minCost };
+    }
+};

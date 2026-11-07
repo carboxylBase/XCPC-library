@@ -35,3 +35,9 @@
 
 - [QOJ18958 - 草莓牛奶](../training/2026/10/2026-10-14/QOJ18958-Strawberry-Milk/notes.md)
   - 末尾排名插入与删除后标准化互为逆操作，保证排列计数不重不漏；概率乘 n! 直接等于合法排列数。
+
+## 带符号的点对贡献与奇偶抵消
+
+- [CF2275H - A Problem to Warm Up the Eyebrows](../training/2026/10/2026-10-23/CF2275H-A-Problem-to-Warm-Up-the-Eyebrows/notes.md)
+  - 元素和平方展开为有序点对；包含点对的矩形按四侧扩展独立计数，交错和仅在四侧距离均为偶数时保留。
+  - 两种对角布局统计无序点对；第二遍严格排除同行和同列，最终以 2T-D 恢复有序贡献。

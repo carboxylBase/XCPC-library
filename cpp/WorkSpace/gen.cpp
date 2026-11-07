@@ -2,14 +2,16 @@
 using namespace std;
 
 int main(){
-    srand(time(0));
-
-    int n=3;
-
-    cout<<n<<"\n";
-
-    for(int i=1;i<=n;i++){
-        cout<<rand()%20+1<<" ";
-    }
-    cout<<"\n";
+    freopen("input.txt", "w", stdout);
+    int n, q;
+    n = 500000;
+    q = 1e5;
+    cout << 1 << endl;
+    cout << n << ' ' << q << endl;
+    for (int i = 2;i<n+1;i++) cout << i - 1 << ' ';
+    cout << endl;
+    while (q --) {
+        int x = rand() % n + 1;
+        cout << x << endl;
+    } 
 }

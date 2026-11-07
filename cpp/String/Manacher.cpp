@@ -9,6 +9,10 @@ const ll N = 2000000;
 const ll INF = 5e18;
 const ll MOD = 1e9 + 7;
 
+/*
+cal 函数其实就是在求最长回文串
+p 数组表示当前位置为中心 形成的最长回文串半径 不包括起点
+*/
 struct Manacher {
     int cal(string& s) {
         string t;
